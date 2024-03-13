@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'BombPartyArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -138,6 +138,44 @@ export interface ConnectFourGameState extends WinnableGameState {
   // The color of the player who will make the first move
   firstPlayer: ConnectFourColor;
 }
+
+/**
+ * Type for the state of a BombParty game.
+ * The state of the game is represented as a list of moves, and the playerIDs of the players
+ */
+export interface BombPartyGameState extends WinnableGameState {
+  // The moves in this game
+  moves: ReadonlyArray<BombPartyMove>;
+  // the playerID of the first seat player, if any
+  seat1?: PlayerID;
+  // the playerID of the second seat player, if any
+  seat2?: PlayerID;
+  // the playerID of the third seat player, if any
+  seat3?: PlayerID;
+  // the playerID of the fourth seat player, if any
+  seat4?: PlayerID;
+  // the playerID of the fifth seat player, if any
+  seat5?: PlayerID;
+  // the playerID of the sixth seat player, if any
+  seat6?: PlayerID;
+  // the playerID of the seventh seat player, if any
+  seat7?: PlayerID;
+  // The number of lives remaning for each seat
+  lives: { [seat: BombPartySeat]: number };
+}
+
+/**
+ * Type for a move in BombParty
+ * The word is the word that the player submitted, the playerSeat is the seat number of the player,
+ * and valid is whether the word is valid
+ */
+export interface BombPartyMove {
+  word: string;
+  playerSeat: BombPartySeat;
+  valid: boolean;
+}
+
+export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /**
  * Type for a move in ConnectFour
