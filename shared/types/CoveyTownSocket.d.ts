@@ -146,22 +146,12 @@ export interface ConnectFourGameState extends WinnableGameState {
 export interface BombPartyGameState extends WinnableGameState {
   // The moves in this game
   moves: ReadonlyArray<BombPartyMove>;
-  // the playerID of the first seat player, if any
-  seat1?: PlayerID;
-  // the playerID of the second seat player, if any
-  seat2?: PlayerID;
-  // the playerID of the third seat player, if any
-  seat3?: PlayerID;
-  // the playerID of the fourth seat player, if any
-  seat4?: PlayerID;
-  // the playerID of the fifth seat player, if any
-  seat5?: PlayerID;
-  // the playerID of the sixth seat player, if any
-  seat6?: PlayerID;
-  // the playerID of the seventh seat player, if any
-  seat7?: PlayerID;
+  // the list of players in the game. The first player in the list is the host player
+  players: ReadonlyArray<PlayerID>;
   // The number of lives remaning for each seat
-  lives: { [seat: BombPartySeat]: number };
+  lives: { [player: PlayerID]: number };
+  // The maximum number of lives a player can have
+  maxLives: number;
 }
 
 /**
