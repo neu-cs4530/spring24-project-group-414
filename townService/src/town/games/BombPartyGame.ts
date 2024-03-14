@@ -57,6 +57,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       ...this.state,
       status: 'IN_PROGRESS',
     };
+    this._iniializeGame();
   }
 
   /**
@@ -88,9 +89,25 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     }
   }
 
+  /**
+   * Removes a player from the game.
+   * Updates the game's state to reflect the player leaving.
+   *
+   * If the game is in progress, the player's life count will be set to 0, and the game will end if there is only one player left.
+   *
+   * If the player count drops below the minimum player count, the game will return to the WAITING_FOR_PLAYERS state.
+   *
+   * If the game state is currently "WAITING_FOR_PLAYERS" or "OVER", the game state is unchanged.
+   *
+   * @param player The player to remove from the game
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   */
   protected _leave(player: Player): void {
     if (this.state.status === 'OVER') {
       return;
+    }
+    if (!this.state.players.some(p => p === player.id)) {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
     switch (this.state.status) {
       case 'WAITING_TO_START':
@@ -107,7 +124,13 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       case 'IN_PROGRESS':
         // Implement deduction of lives for removed player here, then check if the game is over
         this._decreaseLife(player.id, this.state.maxLives);
-        // TODO: Check if the game is over
+        if (this._isGameOver()) {
+          this.state = {
+            ...this.state,
+            status: 'OVER',
+            winner: this.state.players.filter(p => this.state.lives[p] > 0)[0],
+          };
+        }
         break;
       default:
         // This behavior can be undefined :)
@@ -133,5 +156,30 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
         [player]: Math.max(this.state.lives[player] - lifeDecrease, 0),
       },
     };
+  }
+
+  /**
+   * Initializes the game state variables.
+   *
+   * Sets all players to have the maximum number of lives.
+   */
+  protected _iniializeGame(): void {
+    this.state.players.forEach(player => {
+      this.state = {
+        ...this.state,
+        lives: {
+          ...this.state.lives,
+          [player]: this.state.maxLives,
+        },
+      };
+    });
+  }
+
+  /**
+   * Checks if the game is over.
+   * @returns returns true if there is only one player left with lives remaining, false otherwise
+   */
+  protected _isGameOver(): boolean {
+    return this.state.players.filter(p => this.state.lives[p] > 0).length <= 1;
   }
 }
