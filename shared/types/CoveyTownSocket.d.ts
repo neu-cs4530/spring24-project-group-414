@@ -162,7 +162,6 @@ export interface BombPartyGameState extends WinnableGameState {
 export interface BombPartyMove {
   word: string;
   playerSeat: BombPartySeat;
-  valid: boolean;
 }
 
 export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;

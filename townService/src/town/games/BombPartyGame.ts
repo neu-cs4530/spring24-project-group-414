@@ -1,13 +1,25 @@
+import { error } from 'console';
 import InvalidParametersError, {
   GAME_FULL_MESSAGE,
+  GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
+  MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_GAME_HOST_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  WORD_ALREADY_USED_MESSAGE,
+  WORD_NOT_VALID_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { BombPartyGameState, BombPartyMove, GameMove, PlayerID } from '../../types/CoveyTownSocket';
+import {
+  BombPartyGameState,
+  BombPartyMove,
+  BombPartySeat,
+  GameMove,
+  PlayerID,
+} from '../../types/CoveyTownSocket';
 import Game from './Game';
+import DICTIONARY from './dictionary';
 
 /**
  * A BombPartyGame is a Game that implements the rules of the game BombParty.
@@ -57,7 +69,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       ...this.state,
       status: 'IN_PROGRESS',
     };
-    this._iniializeGame();
+    this._initializeGame();
   }
 
   /**
@@ -138,8 +150,63 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     }
   }
 
+  // Find the last seat behind the current one, which is still alive.
+  protected _lastLivingSeat(currentSeat: BombPartySeat): BombPartySeat {
+    for (let i = currentSeat + 1; i < this.MAX_PLAYERS; i++) {
+      if (this.state.lives[this.state.players[i]] > 0) {
+        // Since i < this.MAX_PLAYERS and i > 0, it will always be a BombPartySeat
+        return i as BombPartySeat;
+      }
+    }
+    for (let i = currentSeat - 1; i > -1; i--) {
+      if (this.state.lives[this.state.players[i]] > 0) {
+        // Since i > -1 and i < this.MAX_PLAYERS - 1, it will always be a BombPartySeat
+        return i as BombPartySeat;
+      }
+    }
+    throw new Error('No other living players');
+  }
+
+  protected _validateMove(move: BombPartyMove): void {
+    const currentSeat = move.playerSeat;
+    const lastMoveSeat = this.state.moves[this.state.moves.length - 1].playerSeat;
+    const lastLivingSeat = this._lastLivingSeat(currentSeat);
+    if (lastMoveSeat !== lastLivingSeat) {
+      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
+    }
+    if (!DICTIONARY.includes(move.word)) {
+      throw new InvalidParametersError(WORD_NOT_VALID_MESSAGE);
+    }
+    if (this.state.moves.filter(existingMove => existingMove.word === move.word)) {
+      throw new InvalidParametersError(WORD_ALREADY_USED_MESSAGE);
+    }
+  }
+
+  protected _applyMove(move: BombPartyMove): void {
+    const checkForWin = this._isGameOver();
+    const newMoves = [...this.state.moves, move];
+    const newState: BombPartyGameState = {
+      ...this.state,
+      moves: newMoves,
+    };
+    if (checkForWin) {
+      newState.status = 'OVER';
+      newState.winner = this.state.players[move.playerSeat];
+    }
+    this.state = newState;
+  }
+
   public applyMove(move: GameMove<BombPartyMove>): void {
-    throw new Error('Method not implemented.');
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+    const playerSeat = this.state.players.indexOf(move.playerID);
+    if (playerSeat === -1 || move.move.playerSeat !== playerSeat) {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+
+    this._validateMove(move.move);
+    this._applyMove(move.move);
   }
 
   protected _decreaseLife(player: PlayerID, lifeDecrease: number): void {
@@ -163,7 +230,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    *
    * Sets all players to have the maximum number of lives.
    */
-  protected _iniializeGame(): void {
+  protected _initializeGame(): void {
     this.state.players.forEach(player => {
       this.state = {
         ...this.state,
