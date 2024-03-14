@@ -1,4 +1,5 @@
 import { error } from 'console';
+import { random } from 'nanoid';
 import InvalidParametersError, {
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
@@ -19,7 +20,7 @@ import {
   PlayerID,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
-import DICTIONARY from './dictionary';
+import { DICTIONARY, POPULAR } from './dictionary';
 
 /**
  * A BombPartyGame is a Game that implements the rules of the game BombParty.
@@ -39,7 +40,9 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       lives: {},
       players: [],
       maxLives: 3,
+      prompt: '',
     });
+    this.state.prompt = this._generatePrompt([]);
   }
 
   /**
@@ -151,7 +154,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
   }
 
   // Find the last seat behind the current one, which is still alive.
-  protected _lastLivingSeat(currentSeat: BombPartySeat): BombPartySeat {
+  private _lastLivingSeat(currentSeat: BombPartySeat): BombPartySeat {
     for (let i = currentSeat + 1; i < this.MAX_PLAYERS; i++) {
       if (this.state.lives[this.state.players[i]] > 0) {
         // Since i < this.MAX_PLAYERS and i > 0, it will always be a BombPartySeat
@@ -188,6 +191,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     const newState: BombPartyGameState = {
       ...this.state,
       moves: newMoves,
+      prompt: this._generatePrompt(newMoves),
     };
     if (checkForWin) {
       newState.status = 'OVER';
@@ -248,5 +252,18 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    */
   protected _isGameOver(): boolean {
     return this.state.players.filter(p => this.state.lives[p] > 0).length <= 1;
+  }
+
+  private _generatePrompt(moves: BombPartyMove[]) {
+    const usedWords = new Set(moves.map(move => move.word));
+    const randomPopularWord = POPULAR.filter(word => !usedWords.has(word))[
+      Math.floor(Math.random() * POPULAR.length)
+    ];
+    if (randomPopularWord.length === 2) {
+      return randomPopularWord;
+    }
+    const randomIndex = Math.floor(Math.random() * randomPopularWord.length - 3);
+
+    return randomPopularWord.substring(randomIndex, randomIndex + 3);
   }
 }

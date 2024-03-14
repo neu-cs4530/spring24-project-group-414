@@ -8,7 +8,7 @@ import {
 } from '../../lib/InvalidParametersError';
 import BombPartyGame from './BombPartyGame';
 
-describe('BombPartGame', () => {
+describe('BombPartyGame', () => {
   let game: BombPartyGame;
   beforeEach(() => {
     game = new BombPartyGame();
