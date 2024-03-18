@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'BombPartyArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -138,6 +138,34 @@ export interface ConnectFourGameState extends WinnableGameState {
   // The color of the player who will make the first move
   firstPlayer: ConnectFourColor;
 }
+
+/**
+ * Type for the state of a BombParty game.
+ * The state of the game is represented as a list of moves, and the playerIDs of the players
+ */
+export interface BombPartyGameState extends WinnableGameState {
+  // The moves in this game
+  moves: ReadonlyArray<BombPartyMove>;
+  // the list of players in the game. The first player in the list is the host player
+  players: ReadonlyArray<PlayerID>;
+  // The number of lives remaning for each seat
+  lives: { [player: PlayerID]: number };
+  // The maximum number of lives a player can have
+  maxLives: number;
+}
+
+/**
+ * Type for a move in BombParty
+ * The word is the word that the player submitted, the playerSeat is the seat number of the player,
+ * and valid is whether the word is valid
+ */
+export interface BombPartyMove {
+  word: string;
+  playerSeat: BombPartySeat;
+  valid: boolean;
+}
+
+export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /**
  * Type for a move in ConnectFour
