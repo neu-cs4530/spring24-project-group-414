@@ -146,13 +146,30 @@ export interface ConnectFourGameState extends WinnableGameState {
 export interface BombPartyGameState extends WinnableGameState {
   // The moves in this game
   moves: ReadonlyArray<BombPartyMove>;
+  // the dictionary of words to check against
+  wordsDict: BombPartyWordMap;
+  // the current word for the current player to complete
+  currentPrompt: string;
   // the list of players in the game. The first player in the list is the host player
-  players: ReadonlyArray<PlayerID>;
+  players: ReadonlyArray<PlayerID>; 
+  // the current player typing their responses
+  currentPlayer?: BombPartySeat
   // The number of lives remaning for each seat
-  lives: { [player: PlayerID]: number };
+  playerStats: { [player: PlayerID]: BombPartyStats };
   // The maximum number of lives a player can have
   maxLives: number;
 }
+
+interface BombPartyStats {
+    lives: number,
+    points: number
+}
+
+// to hold the dictionary of english words 
+type BombPartyWordMap = {
+  [key in string]?: boolean; 
+};
+
 
 /**
  * Type for a move in BombParty
@@ -162,7 +179,7 @@ export interface BombPartyGameState extends WinnableGameState {
 export interface BombPartyMove {
   word: string;
   playerSeat: BombPartySeat;
-  valid: boolean;
+  valid: boolean; // remove?
 }
 
 export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;

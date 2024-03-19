@@ -6,8 +6,17 @@ import InvalidParametersError, {
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { BombPartyGameState, BombPartyMove, GameMove, PlayerID } from '../../types/CoveyTownSocket';
+import {
+  BombPartyGameState,
+  BombPartyMove,
+  GameMove,
+  PlayerID,
+  BombPartyWordMap,
+  BombPartyStats,
+} from '../../types/CoveyTownSocket';
 import Game from './Game';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * A BombPartyGame is a Game that implements the rules of the game BombParty.
@@ -23,11 +32,24 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
   constructor() {
     super({
       moves: [],
+      currentPrompt: '',
       status: 'WAITING_FOR_PLAYERS',
-      lives: {},
       players: [],
+      playerStats: {},
+      wordsDict: BombPartyGame._getEnglishWordsDictFromJSON(),
       maxLives: 3,
     });
+  }
+
+  // gets the english dictionary from the JSON file
+  // (credit to https://github.com/dwyl/english-words/blob/master/words_dictionary.json)
+  static _getEnglishWordsDictFromJSON(): BombPartyWordMap {
+    const jsonData = fs.readFileSync(
+      path.join(path.resolve(), 'src/town/games/data/words_dictionary.json'),
+      'utf-8',
+    );
+    const parsedData = JSON.parse(jsonData);
+    return parsedData;
   }
 
   /**
@@ -128,7 +150,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
           this.state = {
             ...this.state,
             status: 'OVER',
-            winner: this.state.players.filter(p => this.state.lives[p] > 0)[0],
+            winner: this.state.players.filter(p => this.state.playerStats[p].lives > 0)[0],
           };
         }
         break;
@@ -138,22 +160,73 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     }
   }
 
+  // checks if the word is valid english word, and if it includes the prompt
+  protected _wordIsValid(word: string): boolean {
+    // if (!this.state.wordsDict) throw new Error('No dictionary defined');
+    if (this.state.wordsDict[word]) return false;
+    if (!word.includes(this.state.currentPrompt)) return false;
+    return true;
+  }
+
+  // randomly generates a prompt string for the player to complete
+  protected _getPrompt(): string {
+    const alph: string = 'abcdefghijklmnopqrstuvwxyz';
+    const twoChar = Math.random() < 0.5;
+    if (twoChar) {
+      return (
+        alph.charAt(Math.floor(Math.random() * 26)) + alph.charAt(Math.floor(Math.random() * 26))
+      );
+    } else {
+      // three chars
+      return (
+        alph.charAt(Math.floor(Math.random() * 26)) +
+        alph.charAt(Math.floor(Math.random() * 26)) +
+        alph.charAt(Math.floor(Math.random() * 26))
+      );
+    }
+  }
+
+  protected _isPlayerTurn(move: GameMove<BombPartyMove>): boolean {
+    return this.state.moves.length % this._players.length == move.move.playerSeat;
+  }
+
+  protected _validateMove(move: GameMove<BombPartyMove>): void {
+    if (!this._isPlayerTurn(move)) {
+      throw new Error('Invalid turn order!');
+    }
+    if (move.move.word.length < 1) {
+      throw new Error('Empty move entry');
+    }
+  }
+
   public applyMove(move: GameMove<BombPartyMove>): void {
-    throw new Error('Method not implemented.');
+    // throw new Error('Not Implemented');
+    // prototype:
+
+    this._validateMove(move);
+    if (this._wordIsValid(move.move.word)) {
+        // increment current player
+        // add some points
+    } else {
+        // decrease lives
+    }
   }
 
   protected _decreaseLife(player: PlayerID, lifeDecrease: number): void {
     if (lifeDecrease < 0) {
       throw new Error('Life decrease cannot be negative');
     }
-    if (this.state.lives[player] === undefined) {
+    if (this.state.playerStats[player] === undefined) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
     this.state = {
       ...this.state,
-      lives: {
-        ...this.state.lives,
-        [player]: Math.max(this.state.lives[player] - lifeDecrease, 0),
+      playerStats: {
+        ...this.state.playerStats,
+        [player]: {
+          lives: Math.max(this.state.playerStats[player].lives - lifeDecrease, 0),
+          points: this.state.playerStats[player].points,
+        },
       },
     };
   }
@@ -167,9 +240,9 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this.state.players.forEach(player => {
       this.state = {
         ...this.state,
-        lives: {
-          ...this.state.lives,
-          [player]: this.state.maxLives,
+        playerStats: {
+          ...this.state.playerStats,
+          [player]: { lives: this.state.maxLives, points: 0 },
         },
       };
     });
@@ -180,6 +253,6 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    * @returns returns true if there is only one player left with lives remaining, false otherwise
    */
   protected _isGameOver(): boolean {
-    return this.state.players.filter(p => this.state.lives[p] > 0).length <= 1;
+    return this.state.players.filter(p => this.state.playerStats[p].lives > 0).length <= 1;
   }
 }
