@@ -15,10 +15,12 @@ describe('BombPartGame', () => {
   let game: BombPartyGame;
   let timer: BombPartyTimer;
   let dictionary: BombPartyDictionary;
+  let stateUpdateCallback: jest.Mock<void, []>;
   beforeEach(() => {
     timer = new BombPartyTimer();
     dictionary = new BombPartyDictionary();
-    game = new BombPartyGame(timer, dictionary);
+    stateUpdateCallback = jest.fn();
+    game = new BombPartyGame(timer, dictionary, stateUpdateCallback);
   });
   afterEach(() => {
     jest.clearAllTimers();

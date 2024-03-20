@@ -8,7 +8,13 @@ import InvalidParametersError, {
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { BombPartyGameState, BombPartyMove, GameMove, PlayerID } from '../../types/CoveyTownSocket';
+import {
+  BombPartyGameState,
+  BombPartyMove,
+  GameInstance,
+  GameMove,
+  PlayerID,
+} from '../../types/CoveyTownSocket';
 import BombPartyDictionary from './BombPartyDictionary';
 import BombPartyTimer from './BombPartyTimer';
 import Game from './Game';
@@ -32,10 +38,17 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
   // The dictionary used to validate words and generate substrings for the game.
   private _dictionary: BombPartyDictionary;
 
+  // The function used to update the game area when the game state changes due to the timer.
+  private _areaUpdateFn: (model: GameInstance<BombPartyGameState>) => void;
+
   /**
    * Creates a new BombPartyGame.
    */
-  public constructor(turnTimer: BombPartyTimer, dictionary: BombPartyDictionary) {
+  public constructor(
+    turnTimer: BombPartyTimer,
+    dictionary: BombPartyDictionary,
+    areaUpdateFn: (model: GameInstance<BombPartyGameState>) => void,
+  ) {
     super({
       moves: [],
       status: 'WAITING_FOR_PLAYERS',
@@ -47,6 +60,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     });
     this._turnTimer = turnTimer;
     this._dictionary = dictionary;
+    this._areaUpdateFn = areaUpdateFn;
   }
 
   /**
@@ -298,5 +312,11 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       ...this.state,
       currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
     };
+    this._areaUpdateFn(this.toModel());
+
+    // Start the turn timer
+    this._turnTimer.startTurn(this._turnTimeLimit, () =>
+      this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+    );
   }
 }

@@ -1,10 +1,19 @@
+import InvalidParametersError, {
+  GAME_ID_MISSMATCH_MESSAGE,
+  GAME_NOT_IN_PROGRESS_MESSAGE,
+  INVALID_COMMAND_MESSAGE,
+} from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
+  BombPartyGameState,
+  GameInstance,
   InteractableCommand,
   InteractableCommandReturnType,
   InteractableType,
 } from '../../types/CoveyTownSocket';
+import BombPartyDictionary from './BombPartyDictionary';
 import BombPartyGame from './BombPartyGame';
+import BombPartyTimer from './BombPartyTimer';
 import GameArea from './GameArea';
 
 /**
@@ -17,6 +26,25 @@ import GameArea from './GameArea';
 export default class BombPartyGameArea extends GameArea<BombPartyGame> {
   protected getType(): InteractableType {
     return 'BombPartyArea';
+  }
+
+  private _stateUpdated(updatedState: GameInstance<BombPartyGameState>) {
+    if (updatedState.state.status === 'OVER') {
+      // If we haven't yet recorded the outcome, do so now.
+      const gameID = this._game?.id;
+      if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
+        const { players } = updatedState.state;
+        players.forEach(player => {
+          this._history.push({
+            gameID,
+            scores: {
+              [player]: updatedState.state.winner === player ? 1 : 0,
+            },
+          });
+        });
+      }
+    }
+    this._emitAreaChanged();
   }
 
   /**
@@ -46,6 +74,54 @@ export default class BombPartyGameArea extends GameArea<BombPartyGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    throw new Error('Method not implemented.');
+    if (command.type === 'GameMove') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      if (this._game?.id !== command.gameID) {
+        throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
+      }
+      // Apply move here after fixing the type issue with command.move
+      this._stateUpdated(game.toModel());
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'JoinGame') {
+      let game = this._game;
+      if (!game || game.state.status === 'OVER') {
+        game = new BombPartyGame(new BombPartyTimer(), new BombPartyDictionary(), state =>
+          this._stateUpdated(state),
+        );
+        this._game = game;
+      }
+      game.join(player);
+      this._stateUpdated(game.toModel());
+      return { gameID: game.id } as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'LeaveGame') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      if (this._game?.id !== command.gameID) {
+        throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
+      }
+      game.leave(player);
+      this._stateUpdated(game.toModel());
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'StartGame') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      if (this._game?.id !== command.gameID) {
+        throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
+      }
+      game.startGame(player);
+      this._stateUpdated(game.toModel());
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 }
