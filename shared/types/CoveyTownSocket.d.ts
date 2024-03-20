@@ -148,10 +148,14 @@ export interface BombPartyGameState extends WinnableGameState {
   moves: ReadonlyArray<BombPartyMove>;
   // the list of players in the game. The first player in the list is the host player
   players: ReadonlyArray<PlayerID>;
+  // The index of the player whose turn it is
+  currentPlayerIndex: number;
   // The number of lives remaning for each seat
   lives: { [player: PlayerID]: number };
   // The maximum number of lives a player can have
   maxLives: number;
+  // The current substring that players are trying to complete
+  currentSubstring: string;
 }
 
 /**
@@ -162,7 +166,6 @@ export interface BombPartyGameState extends WinnableGameState {
 export interface BombPartyMove {
   word: string;
   playerSeat: BombPartySeat;
-  valid: boolean;
 }
 
 export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
