@@ -1,3 +1,20 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Hash collection to hold the dictionary of english words
+type BombPartyWordMap = {
+  [key in string]: boolean;
+};
+
+function loadEnglishDictionaryFromJSON(): BombPartyWordMap {
+  const jsonData = fs.readFileSync(
+    path.join(path.resolve(), 'src/town/games/data/words_dictionary.json'),
+    'utf-8',
+  );
+  const parsedData = JSON.parse(jsonData);
+  return parsedData;
+}
+
 /**
  * A class that checks the validity of words and generates substrings for the game Bomb Party.
  */
@@ -8,10 +25,17 @@ export default class BombPartyDictionary {
   // The list of substrings that have been used in the game.
   private _substringHistory: string[];
 
-  constructor() {
+  // Hash collection used to lookup valid words
+  private _dict: BombPartyWordMap;
+
+  constructor(lang = 'en') {
     this._wordHistory = [];
     this._substringHistory = [];
-    this.loadDictionary();
+    if (lang === 'en') {
+      this._dict = loadEnglishDictionaryFromJSON();
+    } else {
+      throw new Error('Unrecognized language!');
+    }
   }
 
   /**
@@ -19,8 +43,12 @@ export default class BombPartyDictionary {
    *
    * The returned substring should be added to the history of substrings used in the game.
    */
-  public genrateSubstring(): string {
-    throw new Error('Not implemented');
+  public generateSubstring(): string {
+    const words = Object.keys(this._dict);
+    const sz = Math.random() < 0.5 ? 2 : 3;
+    const w = words[Math.floor(Math.random() * words.length)];
+    const start = Math.floor(Math.random() * (w.length - sz));
+    return w.substring(start, start + sz);
   }
 
   /**
@@ -30,10 +58,7 @@ export default class BombPartyDictionary {
    * @param word the word to validate.
    */
   public validateWord(word: string): boolean {
-    if (this._wordHistory.includes(word)) {
-      return false;
-    }
-    throw new Error('Not implemented');
+    return !this._wordHistory.includes(word) && this._dict[word];
   }
 
   /**
@@ -59,6 +84,4 @@ export default class BombPartyDictionary {
     this._wordHistory = [];
     this._substringHistory = [];
   }
-
-  protected loadDictionary(): void {}
 }
