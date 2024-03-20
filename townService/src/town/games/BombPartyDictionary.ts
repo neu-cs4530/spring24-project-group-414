@@ -11,6 +11,7 @@ export default class BombPartyDictionary {
   constructor() {
     this._wordHistory = [];
     this._substringHistory = [];
+    this.loadDictionary();
   }
 
   /**
@@ -58,4 +59,6 @@ export default class BombPartyDictionary {
     this._wordHistory = [];
     this._substringHistory = [];
   }
+
+  protected loadDictionary(): void {}
 }

@@ -193,7 +193,6 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     }
     this._validateMove(move);
     this._applyMove(move);
-    throw new Error('Method not implemented.');
   }
 
   /**
@@ -228,6 +227,10 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
         currentSubstring: this._dictionary.genrateSubstring(),
         currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
       };
+      // Start the turn timer
+      this._turnTimer.startTurn(this._turnTimeLimit, () =>
+        this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+      );
     }
   }
 
@@ -312,11 +315,11 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       ...this.state,
       currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
     };
-    this._areaUpdateFn(this.toModel());
 
     // Start the turn timer
     this._turnTimer.startTurn(this._turnTimeLimit, () =>
       this._endPlayerTurnFailure(this.state.currentPlayerIndex),
     );
+    this._areaUpdateFn(this.toModel());
   }
 }
