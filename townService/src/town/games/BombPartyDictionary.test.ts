@@ -1,13 +1,4 @@
-import { createPlayerForTesting } from '../../TestUtils';
-import {
-  GAME_FULL_MESSAGE,
-  GAME_NOT_STARTABLE_MESSAGE,
-  PLAYER_ALREADY_IN_GAME_MESSAGE,
-  PLAYER_NOT_GAME_HOST_MESSAGE,
-  PLAYER_NOT_IN_GAME_MESSAGE,
-} from '../../lib/InvalidParametersError';
 import BombPartyDictionary from './BombPartyDictionary';
-import exp from 'constants';
 
 describe('BombPartyDictionary', () => {
   let dictionary: BombPartyDictionary;
@@ -30,7 +21,7 @@ describe('BombPartyDictionary', () => {
   });
   test('should invalidate otherwise valid words if they have been used before', () => {
     somewords.forEach(word => {
-      dictionary.addWordToHistory(word)
+      dictionary.addWordToHistory(word);
     });
     somewords.forEach(word => {
       expect(dictionary.validateWord(word)).toBeFalsy();
@@ -38,28 +29,138 @@ describe('BombPartyDictionary', () => {
     somemorewords.forEach(word => {
       expect(dictionary.validateWord(word)).toBeTruthy();
     });
-
   });
   test('should be able to generate a random substring derived from an english word', () => {
-    const unlikely_prompts = [
-      'bk', 'fq', 'jc', 'jt', 'mj', 'qh', 'qx', 'vj', 'wz', 'zh',
-      'bq', 'fv', 'jd', 'jv', 'mq', 'qj', 'qy', 'vk', 'xb', 'zj',
-      'bx', 'fx', 'jf', 'jw', 'mx', 'qk', 'qz', 'vm', 'xg', 'zn',
-      'cb', 'fz', 'jg', 'jx', 'mz', 'ql', 'sx', 'vn', 'xj', 'zq',
-      'cf', 'gq', 'jh', 'jy', 'pq', 'qm', 'sz', 'vp', 'xk', 'zr',
-      'cg', 'gv', 'jk', 'jz', 'pv', 'qn', 'tq', 'vq', 'xv', 'zs',
-      'cj', 'gx', 'jl', 'kq', 'px', 'qo', 'tx', 'vt', 'xz', 'zx',
-      'cp', 'hk', 'jm', 'kv', 'qb', 'qp', 'vb', 'vw', 'yq',
-      'cv', 'hv', 'jn', 'kx', 'qc', 'qr', 'vc', 'vx', 'yv',
-      'cw', 'hx', 'jp', 'kz', 'qd', 'qs', 'vd', 'vz', 'yz',
-      'cx', 'hz', 'jq', 'lq', 'qe', 'qt', 'vf', 'wq', 'zb',
-      'dx', 'iy', 'jr', 'lx', 'qf', 'qv', 'vg', 'wv', 'zc',
-      'fk', 'jb', 'js', 'mg', 'qg', 'qw', 'vh', 'wx', 'zg',
-    ]
+    const unlikelyPrompts = [
+      'bk',
+      'fq',
+      'jc',
+      'jt',
+      'mj',
+      'qh',
+      'qx',
+      'vj',
+      'wz',
+      'zh',
+      'bq',
+      'fv',
+      'jd',
+      'jv',
+      'mq',
+      'qj',
+      'qy',
+      'vk',
+      'xb',
+      'zj',
+      'bx',
+      'fx',
+      'jf',
+      'jw',
+      'mx',
+      'qk',
+      'qz',
+      'vm',
+      'xg',
+      'zn',
+      'cb',
+      'fz',
+      'jg',
+      'jx',
+      'mz',
+      'ql',
+      'sx',
+      'vn',
+      'xj',
+      'zq',
+      'cf',
+      'gq',
+      'jh',
+      'jy',
+      'pq',
+      'qm',
+      'sz',
+      'vp',
+      'xk',
+      'zr',
+      'cg',
+      'gv',
+      'jk',
+      'jz',
+      'pv',
+      'qn',
+      'tq',
+      'vq',
+      'xv',
+      'zs',
+      'cj',
+      'gx',
+      'jl',
+      'kq',
+      'px',
+      'qo',
+      'tx',
+      'vt',
+      'xz',
+      'zx',
+      'cp',
+      'hk',
+      'jm',
+      'kv',
+      'qb',
+      'qp',
+      'vb',
+      'vw',
+      'yq',
+      'cv',
+      'hv',
+      'jn',
+      'kx',
+      'qc',
+      'qr',
+      'vc',
+      'vx',
+      'yv',
+      'cw',
+      'hx',
+      'jp',
+      'kz',
+      'qd',
+      'qs',
+      'vd',
+      'vz',
+      'yz',
+      'cx',
+      'hz',
+      'jq',
+      'lq',
+      'qe',
+      'qt',
+      'vf',
+      'wq',
+      'zb',
+      'dx',
+      'iy',
+      'jr',
+      'lx',
+      'qf',
+      'qv',
+      'vg',
+      'wv',
+      'zc',
+      'fk',
+      'jb',
+      'js',
+      'mg',
+      'qg',
+      'qw',
+      'vh',
+      'wx',
+      'zg',
+    ];
     for (let i = 0; i < 100; i++) {
       const prompt = dictionary.generateSubstring();
-      expect(prompt.length === 2 || prompt.length == 3).toBeTruthy()
-      expect(unlikely_prompts).not.toContain(prompt) // uncertain
+      expect(prompt.length === 2 || prompt.length === 3).toBeTruthy();
+      expect(unlikelyPrompts).not.toContain(prompt); // uncertain
     }
   });
 });

@@ -224,7 +224,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       this.state = {
         ...this.state,
         moves: [...this.state.moves, move.move],
-        currentSubstring: this._dictionary.genrateSubstring(),
+        currentSubstring: this._dictionary.generateSubstring(),
         currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
       };
       // Start the turn timer
@@ -276,7 +276,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this.state = {
       ...this.state,
       currentPlayerIndex: Math.floor(Math.random() * (this.state.players.length - 1)),
-      currentSubstring: this._dictionary.genrateSubstring(),
+      currentSubstring: this._dictionary.generateSubstring(),
     };
     // Start the turn timer
     this._turnTimer.startTurn(this._turnTimeLimit, () =>
