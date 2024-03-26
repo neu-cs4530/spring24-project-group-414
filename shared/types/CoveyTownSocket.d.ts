@@ -165,10 +165,12 @@ export interface BombPartyGameState extends WinnableGameState {
  */
 export interface BombPartyMove {
   word: string;
-  playerSeat: BombPartySeat;
+  playerID: PlayerID;
+
+  // Should be undefined until the word has been validated and stored in the game history
+  valid?: boolean;
 }
 
-export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /**
  * Type for a move in ConnectFour
@@ -247,7 +249,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BombPartyMove> | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;

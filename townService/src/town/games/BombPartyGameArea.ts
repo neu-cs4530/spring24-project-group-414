@@ -6,6 +6,7 @@ import InvalidParametersError, {
 import Player from '../../lib/Player';
 import {
   BombPartyGameState,
+  BombPartyMove,
   GameInstance,
   InteractableCommand,
   InteractableCommandReturnType,
@@ -76,13 +77,18 @@ export default class BombPartyGameArea extends GameArea<BombPartyGame> {
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'GameMove') {
       const game = this._game;
+      const move = command.move as BombPartyMove;
       if (!game) {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
-      // Apply move here after fixing the type issue with command.move
+      game.applyMove({
+        gameID: command.gameID,
+        playerID: player.id,
+        move,
+      });
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }

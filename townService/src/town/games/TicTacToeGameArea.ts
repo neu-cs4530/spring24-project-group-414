@@ -11,6 +11,7 @@ import {
   InteractableCommandReturnType,
   InteractableType,
   TicTacToeGameState,
+  TicTacToeMove,
 } from '../../types/CoveyTownSocket';
 import GameArea from './GameArea';
 import TicTacToeGame from './TicTacToeGame';
@@ -75,20 +76,18 @@ export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'GameMove') {
       const game = this._game;
+      const move = command.move as TicTacToeMove;
       if (!game) {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
-      assert(
-        command.move.gamePiece === 'X' || command.move.gamePiece === 'O',
-        'Invalid game piece',
-      );
+      assert(move.gamePiece === 'X' || move.gamePiece === 'O', 'Invalid game piece');
       game.applyMove({
         gameID: command.gameID,
         playerID: player.id,
-        move: command.move,
+        move,
       });
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;

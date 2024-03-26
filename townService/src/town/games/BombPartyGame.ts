@@ -191,8 +191,13 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     if (!this.state.players.some(p => p === move.playerID)) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
-    this._validateMove(move);
-    this._applyMove(move);
+    const newMove = {
+      playerID: move.playerID,
+      word: move.move.word,
+      valid: undefined,
+    };
+    this._validateMove(newMove);
+    this._applyMove(newMove);
   }
 
   /**
@@ -200,7 +205,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    *
    * @param move the move to validate
    */
-  protected _validateMove(move: GameMove<BombPartyMove>): void {
+  protected _validateMove(move: BombPartyMove): void {
     if (this.state.players[this.state.currentPlayerIndex] !== move.playerID) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
@@ -215,15 +220,16 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    * The turn will not progress if the word is invalid or does not contain the current substring.
    * @param move the move to apply
    */
-  protected _applyMove(move: GameMove<BombPartyMove>): void {
+  protected _applyMove(move: BombPartyMove): void {
     if (
-      this._dictionary.validateWord(move.move.word) &&
-      move.move.word.includes(this.state.currentSubstring)
+      this._dictionary.validateWord(move.word) &&
+      move.word.includes(this.state.currentSubstring)
     ) {
-      this._dictionary.addWordToHistory(move.move.word);
+      move.valid = true;
+      this._dictionary.addWordToHistory(move.word);
       this.state = {
         ...this.state,
-        moves: [...this.state.moves, move.move],
+        moves: [...this.state.moves, move],
         currentSubstring: this._dictionary.generateSubstring(),
         currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
       };
@@ -231,6 +237,12 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       this._turnTimer.startTurn(this._turnTimeLimit, () =>
         this._endPlayerTurnFailure(this.state.currentPlayerIndex),
       );
+    } else {
+      move.valid = false;
+      this.state = {
+        ...this.state,
+        moves: [...this.state.moves, move],
+      };
     }
   }
 
