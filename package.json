@@ -43,7 +43,7 @@
         "typescript-is": "^0.17.0"
     },
     "files": [
-	    "frontend/src/classes/interactable/ConnectFourAreaController.ts",
+        "frontend/src/classes/interactable/ConnectFourAreaController.ts",
         "frontend/src/classes/interactable/InteractableAreaController.ts",
         "frontend/src/components/Town/interactables/ConnectFour/ConnectFourArea.tsx",
         "frontend/src/components/Town/interactables/ConnectFour/ConnectFourBoard.tsx",

@@ -557,12 +557,12 @@
                 {
                  "height":92.2796984663374,
                  "id":39,
-                 "name":"Connect Four 1",
+                 "name":"BombParty",
                  "properties":[
                         {
                          "name":"type",
                          "type":"string",
-                         "value":"ConnectFour"
+                         "value":"BombParty"
                         }],
                  "rotation":0,
                  "type":"GameArea",

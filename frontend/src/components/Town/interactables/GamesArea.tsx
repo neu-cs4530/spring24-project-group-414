@@ -22,6 +22,7 @@ import PlayerController from '../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
 import { GameResult, InteractableID } from '../../../types/CoveyTownSocket';
+import BombPartyArea from './BombParty/BombPartyArea';
 import ChatChannel from './ChatChannel';
 import ConnectFourArea from './ConnectFour/ConnectFourArea';
 import GameAreaInteractable from './GameArea';
@@ -60,6 +61,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
   }, [townController, gameAreaController]);
+  console.log(gameAreaController.toInteractableAreaModel().type)
   return (
     <>
       <Accordion allowToggle>
@@ -100,6 +102,8 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
             <ConnectFourArea interactableID={interactableID} />
           ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
             <TicTacToeArea interactableID={interactableID} />
+          ) : gameAreaController.toInteractableAreaModel().type === 'BombPartyArea' ? (
+            <BombPartyArea interactableID={interactableID} />
           ) : (
             <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
           )}

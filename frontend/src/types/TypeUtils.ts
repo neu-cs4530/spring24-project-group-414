@@ -1,3 +1,4 @@
+import { BombPartyGameProps } from '../components/Town/interactables/BombParty/BombPartyBoard';
 import {
   ConversationArea,
   Interactable,
@@ -5,6 +6,7 @@ import {
   ViewingArea,
   GameArea,
   ConnectFourGameState,
+  BombPartyGameState,
 } from './CoveyTownSocket';
 
 /**
@@ -30,4 +32,9 @@ export function isConnectFourArea(
   interactable: Interactable,
 ): interactable is GameArea<ConnectFourGameState> {
   return interactable.type === 'ConnectFourArea';
+}
+export function isBombPartyArea(
+  interactable: Interactable,
+): interactable is GameArea<BombPartyGameState> {
+  return interactable.type === 'BombPartyArea';
 }
