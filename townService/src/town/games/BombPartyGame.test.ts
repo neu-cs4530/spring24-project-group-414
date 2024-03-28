@@ -1,7 +1,9 @@
 import { createPlayerForTesting } from '../../TestUtils';
 import {
   GAME_FULL_MESSAGE,
+  GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
+  MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_GAME_HOST_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
@@ -253,7 +255,292 @@ describe('BombPartGame', () => {
       });
     });
   });
-  describe('[T1.4] applyMove', () => {
-    // TODO: Add tests for applyMove
+  describe('[T1.4] turnTimeOut', () => {
+    const player1 = createPlayerForTesting();
+    const player2 = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(player1);
+      game.join(player2);
+    });
+    describe('when a turn ends prematurely', () => {
+      it('should not execute the areaChange callback', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        game.applyMove({
+          gameID: game.id,
+          playerID: player1.id,
+          move: {
+            word: 'test',
+            playerID: player1.id,
+          },
+        });
+        expect(game.state.currentPlayerIndex).toBe(1);
+        expect(stateUpdateCallback).not.toHaveBeenCalled();
+      });
+      it('should not decrease the player life count or end the game', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        game.applyMove({
+          gameID: game.id,
+          playerID: player1.id,
+          move: {
+            word: 'test',
+            playerID: player1.id,
+          },
+        });
+        expect(game.state.currentPlayerIndex).toBe(1);
+        expect(game.state.lives[player1.id]).toBe(3);
+        expect(game.state.status).toBe('IN_PROGRESS');
+      });
+    });
+    describe('when a turn times out', () => {
+      it('should execute the areaChange callback', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        jest.advanceTimersByTime(25001);
+        expect(stateUpdateCallback).toHaveBeenCalled();
+        expect(game.state.currentPlayerIndex).toBe(1);
+      });
+      it('should decrease the player life count', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.lives[player1.id]).toBe(3);
+        jest.advanceTimersByTime(25001);
+        expect(game.state.lives[player1.id]).toBe(2);
+        expect(game.state.currentPlayerIndex).toBe(1);
+      });
+      it('should not end the game if multiple players have lives left', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.lives[player1.id]).toBe(3);
+        jest.advanceTimersByTime(25001);
+        expect(game.state.lives[player1.id]).toBe(2);
+        expect(game.state.status).toBe('IN_PROGRESS');
+        expect(game.state.currentPlayerIndex).toBe(1);
+      });
+      it('should not change the word prompt', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.currentSubstring).toBe('test');
+        jest.advanceTimersByTime(25001);
+        expect(game.state.lives[player1.id]).toBe(2);
+        expect(game.state.currentSubstring).toBe('test');
+        expect(game.state.currentPlayerIndex).toBe(1);
+      });
+      it('should end the game if only one player has lives left', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.lives[player1.id]).toBe(3);
+        expect(game.state.lives[player2.id]).toBe(3);
+        jest.advanceTimersByTime(25001);
+        expect(game.state.currentPlayerIndex).toBe(1);
+        expect(game.state.lives[player1.id]).toBe(2);
+        expect(game.state.lives[player2.id]).toBe(3);
+        jest.advanceTimersByTime(25001);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.lives[player1.id]).toBe(2);
+        expect(game.state.lives[player2.id]).toBe(2);
+        jest.advanceTimersByTime(25001);
+        expect(game.state.currentPlayerIndex).toBe(1);
+        expect(game.state.lives[player1.id]).toBe(1);
+        expect(game.state.lives[player2.id]).toBe(2);
+        jest.advanceTimersByTime(25001);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.lives[player1.id]).toBe(1);
+        expect(game.state.lives[player2.id]).toBe(1);
+        jest.advanceTimersByTime(25001);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.lives[player1.id]).toBe(0);
+        expect(game.state.lives[player2.id]).toBe(1);
+        expect(game.state.status).toBe('OVER');
+        expect(game.state.winner).toBe(player2.id);
+      });
+    });
+  });
+  describe('applyMove', () => {
+    const player1 = createPlayerForTesting();
+    const player2 = createPlayerForTesting();
+    const player3 = createPlayerForTesting();
+    const player4 = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(player1);
+      game.join(player2);
+      game.join(player3);
+      game.join(player4);
+    });
+    describe('[T2.2] when given a valid move', () => {
+      it('should accept the word and progress to the next player', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.currentSubstring).toBe('test');
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('second');
+        game.applyMove({
+          gameID: game.id,
+          playerID: player1.id,
+          move: {
+            word: 'test',
+            playerID: player1.id,
+          },
+        });
+        expect(game.state.currentPlayerIndex).toBe(1);
+        expect(game.state.currentSubstring).toBe('second');
+        expect(game.state.moves).toHaveLength(1);
+      });
+      it('should choose the next living player if a player has no lives left', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        game.startGame(player1);
+        game.leave(player2);
+        expect(game.state.lives[player2.id]).toBe(0);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.currentSubstring).toBe('test');
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('second');
+        game.applyMove({
+          gameID: game.id,
+          playerID: player1.id,
+          move: {
+            word: 'test',
+            playerID: player1.id,
+          },
+        });
+        expect(game.state.currentPlayerIndex).toBe(2);
+        expect(game.state.currentSubstring).toBe('second');
+        expect(game.state.moves).toHaveLength(1);
+      });
+    });
+    describe('[T2.3] when given an invalid move', () => {
+      it('throws an error if the game is not in progress', () => {
+        expect(() =>
+          game.applyMove({
+            gameID: game.id,
+            playerID: player1.id,
+            move: { word: 'test', playerID: player1.id },
+          }),
+        ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      });
+      describe('when the game is in progress', () => {
+        it('should throw an error if the player is not in the game', () => {
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          game.startGame(player1);
+          const playerNotInGame = createPlayerForTesting();
+          expect(() =>
+            game.applyMove({
+              gameID: game.id,
+              playerID: playerNotInGame.id,
+              move: { word: 'test', playerID: playerNotInGame.id },
+            }),
+          ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+        });
+        describe('when the player is in the game', () => {
+          it('should throw an error if the player is not the active player', () => {
+            jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+            jest.spyOn(Math, 'random').mockReturnValue(0);
+            game.startGame(player1);
+            expect(() =>
+              game.applyMove({
+                gameID: game.id,
+                playerID: player2.id,
+                move: { word: 'test', playerID: player2.id },
+              }),
+            ).toThrowError(MOVE_NOT_YOUR_TURN_MESSAGE);
+            expect(() =>
+              game.applyMove({
+                gameID: game.id,
+                playerID: player3.id,
+                move: { word: 'test', playerID: player3.id },
+              }),
+            ).toThrowError(MOVE_NOT_YOUR_TURN_MESSAGE);
+          });
+          it('should not progress the game if the word is not in the dictionary', () => {
+            jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+            jest.spyOn(Math, 'random').mockReturnValue(0);
+            game.startGame(player1);
+            expect(game.state.currentPlayerIndex).toBe(0);
+            expect(game.state.currentSubstring).toBe('test');
+            game.applyMove({
+              gameID: game.id,
+              playerID: player1.id,
+              move: { word: 'notaword', playerID: player1.id },
+            });
+            expect(game.state.currentPlayerIndex).toBe(0);
+            expect(game.state.currentSubstring).toBe('test');
+            expect(game.state.moves).toContainEqual({
+              word: 'notaword',
+              playerID: player1.id,
+              valid: false,
+            });
+          });
+        });
+        it('should not progress the game if the word does not contain the substring', () => {
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          game.startGame(player1);
+          expect(game.state.currentPlayerIndex).toBe(0);
+          expect(game.state.currentSubstring).toBe('test');
+          game.applyMove({
+            gameID: game.id,
+            playerID: player1.id,
+            move: { word: 'word', playerID: player1.id },
+          });
+          expect(game.state.currentPlayerIndex).toBe(0);
+          expect(game.state.currentSubstring).toBe('test');
+          expect(game.state.moves).toContainEqual({
+            word: 'word',
+            playerID: player1.id,
+            valid: false,
+          });
+        });
+        it('should not progress the game if the word has been submitted before', () => {
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          game.startGame(player1);
+          expect(game.state.currentPlayerIndex).toBe(0);
+          expect(game.state.currentSubstring).toBe('test');
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('sti');
+          game.applyMove({
+            gameID: game.id,
+            playerID: player1.id,
+            move: { word: 'testing', playerID: player1.id },
+          });
+          expect(game.state.currentPlayerIndex).toBe(1);
+          expect(game.state.currentSubstring).toBe('sti');
+          expect(game.state.moves).toContainEqual({
+            word: 'testing',
+            playerID: player1.id,
+            valid: true,
+          });
+          game.applyMove({
+            gameID: game.id,
+            playerID: player2.id,
+            move: { word: 'testing', playerID: player2.id },
+          });
+          expect(game.state.currentPlayerIndex).toBe(1);
+          expect(game.state.currentSubstring).toBe('sti');
+          expect(game.state.moves).toHaveLength(2);
+          expect(game.state.moves).toContainEqual({
+            word: 'testing',
+            playerID: player2.id,
+            valid: false,
+          });
+        });
+      });
+    });
   });
 });

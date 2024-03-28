@@ -37,6 +37,20 @@ describe('BombPartyTimer', () => {
       jest.runAllTimers();
       expect(secondEndTurnCallback).not.toHaveBeenCalled();
     });
+    it('should start after being stopped and started again', () => {
+      timer.startTurn(500, endTurnCallback);
+      timer.endTurn();
+      timer.startTurn(500, endTurnCallback);
+      jest.runAllTimers();
+      expect(endTurnCallback).toHaveBeenCalled();
+    });
+    it('should start after timing out and started again', () => {
+      timer.startTurn(500, endTurnCallback);
+      jest.runAllTimers();
+      timer.startTurn(500, endTurnCallback);
+      jest.runAllTimers();
+      expect(endTurnCallback).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('endTurn', () => {

@@ -225,13 +225,18 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       this._dictionary.validateWord(move.word) &&
       move.word.includes(this.state.currentSubstring)
     ) {
+      this._turnTimer.endTurn();
       move.valid = true;
       this._dictionary.addWordToHistory(move.word);
+      let nextPlayerIndex = (this.state.currentPlayerIndex + 1) % this.state.players.length;
+      while (this.state.lives[this.state.players[nextPlayerIndex]] <= 0) {
+        nextPlayerIndex = (nextPlayerIndex + 1) % this.state.players.length;
+      }
       this.state = {
         ...this.state,
         moves: [...this.state.moves, move],
         currentSubstring: this._dictionary.generateSubstring(),
-        currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
+        currentPlayerIndex: nextPlayerIndex,
       };
       // Start the turn timer
       this._turnTimer.startTurn(this._turnTimeLimit, () =>
@@ -322,12 +327,17 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       };
       return;
     }
+    this._turnTimer.endTurn();
+    // Find the next alive player
+    let nextPlayerIndex = (playerIndex + 1) % this.state.players.length;
+    while (this.state.lives[this.state.players[nextPlayerIndex]] <= 0) {
+      nextPlayerIndex = (nextPlayerIndex + 1) % this.state.players.length;
+    }
     // Select next player without changing the current substring
     this.state = {
       ...this.state,
-      currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
+      currentPlayerIndex: nextPlayerIndex,
     };
-
     // Start the turn timer
     this._turnTimer.startTurn(this._turnTimeLimit, () =>
       this._endPlayerTurnFailure(this.state.currentPlayerIndex),
