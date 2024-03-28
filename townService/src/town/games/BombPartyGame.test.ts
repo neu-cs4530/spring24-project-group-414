@@ -6,12 +6,25 @@ import {
   PLAYER_NOT_GAME_HOST_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
+import BombPartyDictionary from './BombPartyDictionary';
 import BombPartyGame from './BombPartyGame';
+import BombPartyTimer from './BombPartyTimer';
 
 describe('BombPartGame', () => {
+  jest.useFakeTimers();
   let game: BombPartyGame;
+  let timer: BombPartyTimer;
+  let dictionary: BombPartyDictionary;
+  let stateUpdateCallback: jest.Mock<void, []>;
   beforeEach(() => {
-    game = new BombPartyGame();
+    timer = new BombPartyTimer();
+    dictionary = new BombPartyDictionary();
+    stateUpdateCallback = jest.fn();
+    game = new BombPartyGame(timer, dictionary, stateUpdateCallback);
+  });
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.restoreAllMocks();
   });
   describe('[T1.1] _join', () => {
     it('should throw an error if the player is already in the game', () => {
@@ -101,6 +114,7 @@ describe('BombPartGame', () => {
     });
     describe('if the player is the game host and the game is in the WAITING_TO_START state', () => {
       it('should start the game', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
         const player1 = createPlayerForTesting();
         const player2 = createPlayerForTesting();
         game.join(player1);
@@ -109,6 +123,7 @@ describe('BombPartGame', () => {
         expect(game.state.status).toBe('IN_PROGRESS');
       });
       it('should set all players to have max lives', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
         const player1 = createPlayerForTesting();
         const player2 = createPlayerForTesting();
         game.join(player1);
@@ -116,6 +131,17 @@ describe('BombPartGame', () => {
         game.startGame(player1);
         expect(game.state.lives[player1.id]).toBe(3);
         expect(game.state.lives[player2.id]).toBe(3);
+      });
+      it('should set the turn of the first player and generate a substring', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        const player1 = createPlayerForTesting();
+        const player2 = createPlayerForTesting();
+        game.join(player1);
+        game.join(player2);
+        game.startGame(player1);
+        expect(game.state.currentPlayerIndex).toBe(0);
+        expect(game.state.currentSubstring).toBe('test');
       });
       // TODO: Expand startGame tests to cover the changes caused by the game starting
     });
@@ -130,6 +156,7 @@ describe('BombPartGame', () => {
     describe('when the player is in the game', () => {
       describe('when the game is in progress', () => {
         it('should set the life count of that player to 0', () => {
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
           const player1 = createPlayerForTesting();
           const player2 = createPlayerForTesting();
           game.join(player1);
@@ -139,6 +166,7 @@ describe('BombPartGame', () => {
           expect(game.state.lives[player2.id]).toBe(0);
         });
         it('should end the game if the player leaving is the last player', () => {
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
           const player1 = createPlayerForTesting();
           game.join(player1);
           const player2 = createPlayerForTesting();
@@ -153,6 +181,7 @@ describe('BombPartGame', () => {
           expect(game.state.winner).toBe(player2.id);
         });
         it('should not end the game if the player leaving is not the last player', () => {
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
           const player1 = createPlayerForTesting();
           const player2 = createPlayerForTesting();
           const player3 = createPlayerForTesting();
@@ -166,6 +195,7 @@ describe('BombPartGame', () => {
         });
       });
       test('when the game is over, it should not change the game state', () => {
+        jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
         const player1 = createPlayerForTesting();
         game.join(player1);
         const player2 = createPlayerForTesting();
@@ -199,6 +229,7 @@ describe('BombPartGame', () => {
           expect(game.state.status).toBe('WAITING_TO_START');
         });
         test('if the host leaves, the next oldest player should become the host', () => {
+          jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
           const player1 = createPlayerForTesting();
           const player2 = createPlayerForTesting();
           const player3 = createPlayerForTesting();

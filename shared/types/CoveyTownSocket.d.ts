@@ -148,10 +148,14 @@ export interface BombPartyGameState extends WinnableGameState {
   moves: ReadonlyArray<BombPartyMove>;
   // the list of players in the game. The first player in the list is the host player
   players: ReadonlyArray<PlayerID>;
+  // The index of the player whose turn it is
+  currentPlayerIndex: number;
   // The number of lives remaning for each seat
   lives: { [player: PlayerID]: number };
   // The maximum number of lives a player can have
   maxLives: number;
+  // The current substring that players are trying to complete
+  currentSubstring: string;
 }
 
 /**
@@ -161,11 +165,12 @@ export interface BombPartyGameState extends WinnableGameState {
  */
 export interface BombPartyMove {
   word: string;
-  playerSeat: BombPartySeat;
-  valid: boolean;
+  playerID: PlayerID;
+
+  // Should be undefined until the word has been validated and stored in the game history
+  valid?: boolean;
 }
 
-export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /**
  * Type for a move in ConnectFour
@@ -244,7 +249,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BombPartyMove> | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
