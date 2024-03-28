@@ -27,7 +27,10 @@ export default class BombPartyAreaController extends GameAreaController<
   get players(): PlayerController[] {
     const players = this._model.game?.state.players;
     if (players) {
-      return this.occupants.filter(eachOccupant => players.includes(eachOccupant.id));
+      return players.map(
+        playerId =>
+          this.occupants.find(eachOccupant => eachOccupant.id === playerId) as PlayerController,
+      );
     }
     return [];
   }

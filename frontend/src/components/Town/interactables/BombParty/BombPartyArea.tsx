@@ -130,7 +130,14 @@ export default function BombPartyArea({
           <List aria-label='list of players in the game'>
             <VStack alignItems='stretch'>
               {players &&
-                players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
+                players.map((player, index) => (
+                  <ListItem key={index}>
+                    {townController.ourPlayer === player
+                      ? player.userName + ' (you)'
+                      : player.userName}{' '}
+                    {index === 0 && ' (host)'}
+                  </ListItem>
+                ))}
             </VStack>
           </List>
         </GridItem>
