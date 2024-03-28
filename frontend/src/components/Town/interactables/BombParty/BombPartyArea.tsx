@@ -23,6 +23,8 @@ import useTownController from '../../../../hooks/useTownController';
 import { InteractableID, GameResult, GameStatus } from '../../../../types/CoveyTownSocket';
 import GameArea from '../GameArea';
 import BombPartyBoard from './BombPartyBoard';
+import React from 'react';
+import PlayerController from '../../../../classes/PlayerController';
 
 /**
  * Overall BombParty frontend area that allows for the player to join a game,
@@ -37,6 +39,9 @@ export default function BombPartyArea({
   const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
   const townController = useTownController();
   // states to hold BombPartyAreaValues
+  const [players, setPlayers] = useState<PlayerController[] | undefined>(
+    gameAreaController.players,
+  );
   const [isJoining, setIsJoining] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -52,11 +57,24 @@ export default function BombPartyArea({
 
   useEffect(() => {
     //functions to update states
-    const updateGame = () => {};
-  }, [gameAreaController, townController]);
+    const updateGameState = () => {
+      setPlayers(gameAreaController.players);
+      setGameStatus(gameAreaController.status);
+    };
+    const onGameEnd = () => {
+      throw new Error('not implemented');
+    };
+    gameAreaController.addListener('gameUpdated', updateGameState);
+    gameAreaController.addListener('gameEnd', onGameEnd);
+    return () => {
+      gameAreaController.removeListener('gameUpdated', updateGameState);
+      gameAreaController.removeListener('gameEnd', onGameEnd);
+    };
+  }, [gameAreaController, townController, toast]);
 
+  //(inGame && status === 'WAITING_TO_START')
   const joinGameButton =
-    (inGame && status === 'WAITING_TO_START') || status === 'IN_PROGRESS' ? (
+    status === 'OVER' || status === 'IN_PROGRESS' ? (
       <></>
     ) : (
       <Button
@@ -110,7 +128,10 @@ export default function BombPartyArea({
       <SimpleGrid columns={3} gap={6}>
         <GridItem colSpan={2} alignContent='center'>
           <List aria-label='list of players in the game'>
-            <VStack alignItems='stretch'></VStack>
+            <VStack alignItems='stretch'>
+              {players &&
+                players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
+            </VStack>
           </List>
         </GridItem>
         <GridItem>
@@ -122,14 +143,17 @@ export default function BombPartyArea({
       </SimpleGrid>
     ) : (
       <List aria-label='list of players in the game'>
-        <VStack alignItems='stretch' borderY={-1}></VStack>
+        <VStack alignItems='stretch' borderY={-1}>
+          {players &&
+            players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
+        </VStack>
       </List>
     );
   console.log('list Players');
 
   return (
     <Container minW='full' paddingX='0px'>
-      <VStack minW='max' bgColor='white' align='center' paddingBottom='5'>
+      <VStack bgColor='white' align='center' paddingBottom='5'>
         <Divider />
         {listPlayers}
         <Divider />
