@@ -1,33 +1,43 @@
 import React, { useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
-import { InteractableID } from '../../../../types/CoveyTownSocket';
+import { InvalidParametersError, PlayerID } from '../../../../generated/client';
+import { BombPartyMove, InteractableID } from '../../../../types/CoveyTownSocket';
 import { TextBox } from './Components/TextBox';
+import WarningLabel from './Components/WarningLabel'
+import _ from 'lodash';
+
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
 };
 
-export default function BombPartyBoard({ gameAreaController }: BombPartyGameProps): JSX.Element {
-  const checkWord = (word: string): boolean => {
-    return word == 'car';
+
+export default function BombPartyBoard({gameAreaController}: BombPartyGameProps): JSX.Element {
+  const checkWord = async(word: string): Promise<string> => {
+    try { 
+      await gameAreaController.makeMove(word);
+      return ""
+    } catch (e) {
+      if (e instanceof Error){
+        return e.message
+      }
+      return ""}
   }
 
   const [ textBoxText, setTextBoxText ] = useState("");
+  const [ warningLabel, setWarningLabel ] = useState("");
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTextBoxText(event.currentTarget.value);
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (checkWord(textBoxText)) {
-      console.log("That's a valid word!");
-    }
-    else {
-      console.log("Not correct.");
-    }
-
+      setWarningLabel(await checkWord(textBoxText))
     setTextBoxText("");
   }
 
-  return <TextBox value={textBoxText} handleChange={handleChange} handleSubmit={handleSubmit}/>
+  return <div> <TextBox value={textBoxText} handleChange={handleChange} handleSubmit={handleSubmit}/>
+  <WarningLabel>{warningLabel}</WarningLabel>
+  </div>
 }
 

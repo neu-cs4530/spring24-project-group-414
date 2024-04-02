@@ -35,6 +35,10 @@ export default class BombPartyAreaController extends GameAreaController<
     return [];
   }
 
+  get playerID(): string {
+    return this._townController.ourPlayer.id
+  }
+
   /**
    * Returns the player who won the game, if there is one, or undefined otherwise
    */
