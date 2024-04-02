@@ -3,41 +3,44 @@ import BombPartyAreaController from '../../../../classes/interactable/BombPartyA
 import { InvalidParametersError, PlayerID } from '../../../../generated/client';
 import { BombPartyMove, InteractableID } from '../../../../types/CoveyTownSocket';
 import { TextBox } from './Components/TextBox';
-import WarningLabel from './Components/WarningLabel'
+import WarningLabel from './Components/WarningLabel';
 import _ from 'lodash';
 
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
 };
 
-
-export default function BombPartyBoard({gameAreaController}: BombPartyGameProps): JSX.Element {
-  const checkWord = async(word: string): Promise<string> => {
-    try { 
+export default function BombPartyBoard({ gameAreaController }: BombPartyGameProps): JSX.Element {
+  const checkWord = async (word: string): Promise<string> => {
+    try {
       await gameAreaController.makeMove(word);
-      return ""
+      return '';
     } catch (e) {
-      if (e instanceof Error){
-        return e.message
+      if (e instanceof Error) {
+        return e.message;
       }
-      return ""}
-  }
+      return '';
+    }
+  };
 
-  const [ textBoxText, setTextBoxText ] = useState("");
-  const [ warningLabel, setWarningLabel ] = useState("");
+  const [textBoxText, setTextBoxText] = useState('');
+  const [warningLabel, setWarningLabel] = useState('');
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTextBoxText(event.currentTarget.value);
-  }
+  };
 
-  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-      setWarningLabel(await checkWord(textBoxText))
-    setTextBoxText("");
-  }
+    setWarningLabel(await checkWord(textBoxText));
+    setTextBoxText('');
+  };
 
-  return <div> <TextBox value={textBoxText} handleChange={handleChange} handleSubmit={handleSubmit}/>
-  <WarningLabel>{warningLabel}</WarningLabel>
-  </div>
+  return (
+    <div>
+      {' '}
+      <TextBox value={textBoxText} handleChange={handleChange} handleSubmit={handleSubmit} />
+      <WarningLabel>{warningLabel}</WarningLabel>
+    </div>
+  );
 }
-
