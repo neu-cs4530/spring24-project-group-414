@@ -32,7 +32,7 @@ import {
   isConversationArea,
   isTicTacToeArea,
   isViewingArea,
-  isBombPartyArea
+  isBombPartyArea,
 } from '../types/TypeUtils';
 import BombPartyAreaController from './interactable/BombPartyAreaController';
 import ConnectFourAreaController from './interactable/ConnectFourAreaController';
@@ -633,10 +633,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(
               new ConnectFourAreaController(eachInteractable.id, eachInteractable, this),
             );
-          }  else if (isBombPartyArea(eachInteractable)) {
-              this._interactableControllers.push(
-                new BombPartyAreaController(eachInteractable.id, eachInteractable, this),
-              );
+          } else if (isBombPartyArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new BombPartyAreaController(eachInteractable.id, eachInteractable, this),
+            );
           }
         });
         this._userID = initialData.userID;
