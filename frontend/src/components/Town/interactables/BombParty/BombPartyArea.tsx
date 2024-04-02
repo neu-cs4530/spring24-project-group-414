@@ -44,9 +44,6 @@ export default function BombPartyArea({
   );
   const [isJoining, setIsJoining] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  const [isLBModalOpen, setIsLBModalOpen] = useState(false);
-  const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
   const [status, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   // states to hold game values from controller
   const [, setHistory] = useState<GameResult[]>(gameAreaController.history);
