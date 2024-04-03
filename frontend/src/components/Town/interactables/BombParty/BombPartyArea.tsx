@@ -39,7 +39,7 @@ export default function BombPartyArea({
   const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
   const townController = useTownController();
   // states to hold BombPartyAreaValues
-  const [players, setPlayers] = useState<PlayerController[] | undefined>(
+  const [players, setPlayers] = useState<PlayerController[]>(
     gameAreaController.players,
   );
   const [isJoining, setIsJoining] = useState(false);
@@ -62,13 +62,30 @@ export default function BombPartyArea({
       setGameStatus(gameAreaController.status);
     };
     const onGameEnd = () => {
-      throw new Error('not implemented');
+      const winner = gameAreaController.winner;
+      if (!winner) {
+        // nothing
+      } else if (winner === townController.ourPlayer) {
+        toast({
+          title: 'Game over',
+          description: 'You won!',
+          status: 'success',
+        });
+      } else {
+        toast({
+          title: 'Game over',
+          description: winner + ` is the winner`,
+          status: 'error',
+        });
+      }
+      // TODO: reset this in the proper way
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
     gameAreaController.addListener('gameEnd', onGameEnd);
     return () => {
       gameAreaController.removeListener('gameUpdated', updateGameState);
       gameAreaController.removeListener('gameEnd', onGameEnd);
+      gameAreaController.addListener('gameUpdated', updateGameState);
     };
   }, [gameAreaController, townController, toast]);
 
@@ -172,7 +189,7 @@ export default function BombPartyArea({
         borderWidth='5px'
         borderRadius='5px'
         borderColor='black'>
-        {status !== 'WAITING_TO_START' && (
+        {status === 'IN_PROGRESS' && (
           <BombPartyBoard gameAreaController={gameAreaController} />
         )}
       </Container>

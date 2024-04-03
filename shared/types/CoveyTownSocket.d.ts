@@ -156,6 +156,9 @@ export interface BombPartyGameState extends WinnableGameState {
   maxLives: number;
   // The current substring that players are trying to complete
   currentSubstring: string;
+  // the current time remaining in the player's turn (milliseconds) 
+  // TODO: figure out a better type for this
+  currentTimeLeft: number
 }
 
 /**

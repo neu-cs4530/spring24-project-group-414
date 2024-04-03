@@ -15,6 +15,7 @@ import GameAreaController, {
 
 export type BombPartyEvents = GameEventTypes & {
   turnChanged: (isOurTurn: boolean) => void;
+  timerChanged: (secondsLeft: number) => void;
 };
 
 export default class BombPartyAreaController extends GameAreaController<
@@ -26,7 +27,7 @@ export default class BombPartyAreaController extends GameAreaController<
    */
   get players(): PlayerController[] {
     const players = this._model.game?.state.players;
-    if (players) {
+    if (players && players.length > 0) {
       return players.map(
         playerId =>
           this.occupants.find(eachOccupant => eachOccupant.id === playerId) as PlayerController,
@@ -104,6 +105,23 @@ export default class BombPartyAreaController extends GameAreaController<
   }
 
   /**
+   * Gets the current substring prompt for the player to complete with a word
+   */
+  get currentPrompt(): String | undefined {
+    if (!this._model.game || this._model.game?.state.status !== 'IN_PROGRESS') {
+      return undefined;
+    }
+    return this._model.game.state.currentSubstring;
+  }
+
+  get currentTimeLeft(): number | undefined {
+    if (!this._model.game || this._model.game?.state.status !== 'IN_PROGRESS') {
+      return undefined;
+    }
+    return this._model.game.state.currentTimeLeft
+  }
+
+  /**
    * Returns true if the game is empty - no players AND no occupants in the area
    *
    */
@@ -118,6 +136,9 @@ export default class BombPartyAreaController extends GameAreaController<
     return !this.isEmpty() && this.status !== 'WAITING_FOR_PLAYERS';
   }
 
+  /**
+   * Returns the number of lives for a given player 
+   */
   public getPlayerLives(playerID: PlayerID): number {
     return this._model.game?.state.lives[playerID] ?? 0;
   }
@@ -154,6 +175,7 @@ export default class BombPartyAreaController extends GameAreaController<
       gameID: instanceID,
       type: 'StartGame',
     });
+    this.emit('gameStart');
   }
 
   /**
@@ -178,5 +200,6 @@ export default class BombPartyAreaController extends GameAreaController<
       type: 'GameMove',
       move,
     });
+    this.emit('gameUpdated');
   }
 }

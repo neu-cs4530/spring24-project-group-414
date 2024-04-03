@@ -8,16 +8,23 @@ import InvalidParametersError, {
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
+<<<<<<< HEAD
 import {
   BombPartyGameState,
   BombPartyMove,
-  GameInstance,
   GameMove,
   PlayerID,
+  BombPartyWordMap,
+  BombPartyStats,
 } from '../../types/CoveyTownSocket';
+=======
+import { BombPartyGameState, BombPartyMove, GameMove, PlayerID } from '../../types/CoveyTownSocket';
 import BombPartyDictionary from './BombPartyDictionary';
 import BombPartyTimer from './BombPartyTimer';
+>>>>>>> 53b7b9a (Added a definition for the dictionary with methods needed for apply move.)
 import Game from './Game';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * A BombPartyGame is a Game that implements the rules of the game BombParty.
@@ -38,30 +45,37 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
   // The dictionary used to validate words and generate substrings for the game.
   private _dictionary: BombPartyDictionary;
 
-  // The function used to update the game area when the game state changes due to the timer.
-  private _areaUpdateFn: (model: GameInstance<BombPartyGameState>) => void;
-
   /**
    * Creates a new BombPartyGame.
    */
-  public constructor(
-    turnTimer: BombPartyTimer,
-    dictionary: BombPartyDictionary,
-    areaUpdateFn: (model: GameInstance<BombPartyGameState>) => void,
-  ) {
+  public constructor(turnTimer: BombPartyTimer, dictionary: BombPartyDictionary) {
     super({
       moves: [],
+      currentPrompt: '',
       status: 'WAITING_FOR_PLAYERS',
-      lives: {},
       players: [],
+<<<<<<< HEAD
+      playerStats: {},
+      wordsDict: BombPartyGame._getEnglishWordsDictFromJSON(),
+=======
       currentPlayerIndex: 0,
       currentSubstring: '',
+>>>>>>> 53b7b9a (Added a definition for the dictionary with methods needed for apply move.)
       maxLives: 3,
-      currentTimeLeft: 10,
     });
     this._turnTimer = turnTimer;
     this._dictionary = dictionary;
-    this._areaUpdateFn = areaUpdateFn;
+  }
+
+  // gets the english dictionary from the JSON file
+  // (credit to https://github.com/dwyl/english-words/blob/master/words_dictionary.json)
+  static _getEnglishWordsDictFromJSON(): BombPartyWordMap {
+    const jsonData = fs.readFileSync(
+      path.join(path.resolve(), 'src/town/games/data/words_dictionary.json'),
+      'utf-8',
+    );
+    const parsedData = JSON.parse(jsonData);
+    return parsedData;
   }
 
   /**
@@ -162,7 +176,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
           this.state = {
             ...this.state,
             status: 'OVER',
-            winner: this.state.players.filter(p => this.state.lives[p] > 0)[0],
+            winner: this.state.players.filter(p => this.state.playerStats[p].lives > 0)[0],
           };
         }
         break;
@@ -172,6 +186,58 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     }
   }
 
+<<<<<<< HEAD
+  // checks if the word is valid english word, and if it includes the prompt
+  protected _wordIsValid(word: string): boolean {
+    // if (!this.state.wordsDict) throw new Error('No dictionary defined');
+    if (this.state.wordsDict[word]) return false;
+    if (!word.includes(this.state.currentPrompt)) return false;
+    return true;
+  }
+
+  // randomly generates a prompt string for the player to complete
+  protected _getPrompt(): string {
+    const alph: string = 'abcdefghijklmnopqrstuvwxyz';
+    const twoChar = Math.random() < 0.5;
+    if (twoChar) {
+      return (
+        alph.charAt(Math.floor(Math.random() * 26)) + alph.charAt(Math.floor(Math.random() * 26))
+      );
+    } else {
+      // three chars
+      return (
+        alph.charAt(Math.floor(Math.random() * 26)) +
+        alph.charAt(Math.floor(Math.random() * 26)) +
+        alph.charAt(Math.floor(Math.random() * 26))
+      );
+    }
+  }
+
+  protected _isPlayerTurn(move: GameMove<BombPartyMove>): boolean {
+    return this.state.moves.length % this._players.length == move.move.playerSeat;
+  }
+
+  protected _validateMove(move: GameMove<BombPartyMove>): void {
+    if (!this._isPlayerTurn(move)) {
+      throw new Error('Invalid turn order!');
+    }
+    if (move.move.word.length < 1) {
+      throw new Error('Empty move entry');
+    }
+  }
+
+  public applyMove(move: GameMove<BombPartyMove>): void {
+    // throw new Error('Not Implemented');
+    // prototype:
+
+    this._validateMove(move);
+    if (this._wordIsValid(move.move.word)) {
+        // increment current player
+        // add some points
+    } else {
+        // decrease lives
+    }
+=======
   /**
    * Applies a move to the game.
    * Uses the player's ID to determube which seat the player is in.
@@ -192,13 +258,10 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     if (!this.state.players.some(p => p === move.playerID)) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
-    const newMove = {
-      playerID: move.playerID,
-      word: move.move.word,
-      valid: undefined,
-    };
-    this._validateMove(newMove);
-    this._applyMove(newMove);
+    this._validateMove(move);
+    this._applyMove(move);
+    throw new Error('Method not implemented.');
+>>>>>>> 53b7b9a (Added a definition for the dictionary with methods needed for apply move.)
   }
 
   /**
@@ -206,7 +269,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    *
    * @param move the move to validate
    */
-  protected _validateMove(move: BombPartyMove): void {
+  protected _validateMove(move: GameMove<BombPartyMove>): void {
     if (this.state.players[this.state.currentPlayerIndex] !== move.playerID) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
@@ -221,33 +284,17 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    * The turn will not progress if the word is invalid or does not contain the current substring.
    * @param move the move to apply
    */
-  protected _applyMove(move: BombPartyMove): void {
+  protected _applyMove(move: GameMove<BombPartyMove>): void {
     if (
-      this._dictionary.validateWord(move.word) &&
-      move.word.includes(this.state.currentSubstring)
+      this._dictionary.validateWord(move.move.word) &&
+      move.move.word.includes(this.state.currentSubstring)
     ) {
-      this._turnTimer.endTurn();
-      move.valid = true;
-      this._dictionary.addWordToHistory(move.word);
-      let nextPlayerIndex = (this.state.currentPlayerIndex + 1) % this.state.players.length;
-      while (this.state.lives[this.state.players[nextPlayerIndex]] <= 0) {
-        nextPlayerIndex = (nextPlayerIndex + 1) % this.state.players.length;
-      }
+      this._dictionary.addWordToHistory(move.move.word);
       this.state = {
         ...this.state,
-        moves: [...this.state.moves, move],
-        currentSubstring: this._dictionary.generateSubstring(),
-        currentPlayerIndex: nextPlayerIndex,
-      };
-      // Start the turn timer
-      this._turnTimer.startTurn(this._turnTimeLimit, () =>
-        this._endPlayerTurnFailure(this.state.currentPlayerIndex),
-      );
-    } else {
-      move.valid = false;
-      this.state = {
-        ...this.state,
-        moves: [...this.state.moves, move],
+        moves: [...this.state.moves, move.move],
+        currentSubstring: this._dictionary.genrateSubstring(),
+        currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
       };
     }
   }
@@ -262,14 +309,17 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     if (lifeDecrease < 0) {
       throw new Error('Life decrease cannot be negative');
     }
-    if (this.state.lives[player] === undefined) {
+    if (this.state.playerStats[player] === undefined) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
     this.state = {
       ...this.state,
-      lives: {
-        ...this.state.lives,
-        [player]: Math.max(this.state.lives[player] - lifeDecrease, 0),
+      playerStats: {
+        ...this.state.playerStats,
+        [player]: {
+          lives: Math.max(this.state.playerStats[player].lives - lifeDecrease, 0),
+          points: this.state.playerStats[player].points,
+        },
       },
     };
   }
@@ -284,9 +334,9 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this.state.players.forEach(player => {
       this.state = {
         ...this.state,
-        lives: {
-          ...this.state.lives,
-          [player]: this.state.maxLives,
+        playerStats: {
+          ...this.state.playerStats,
+          [player]: { lives: this.state.maxLives, points: 0 },
         },
       };
     });
@@ -294,7 +344,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this.state = {
       ...this.state,
       currentPlayerIndex: Math.floor(Math.random() * (this.state.players.length - 1)),
-      currentSubstring: this._dictionary.generateSubstring(),
+      currentSubstring: this._dictionary.genrateSubstring(),
     };
     // Start the turn timer
     this._turnTimer.startTurn(this._turnTimeLimit, () =>
@@ -307,7 +357,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    * @returns returns true if there is only one player left with lives remaining, false otherwise
    */
   protected _isGameOver(): boolean {
-    return this.state.players.filter(p => this.state.lives[p] > 0).length <= 1;
+    return this.state.players.filter(p => this.state.playerStats[p].lives > 0).length <= 1;
   }
 
   /**
@@ -328,21 +378,10 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       };
       return;
     }
-    this._turnTimer.endTurn();
-    // Find the next alive player
-    let nextPlayerIndex = (playerIndex + 1) % this.state.players.length;
-    while (this.state.lives[this.state.players[nextPlayerIndex]] <= 0) {
-      nextPlayerIndex = (nextPlayerIndex + 1) % this.state.players.length;
-    }
     // Select next player without changing the current substring
     this.state = {
       ...this.state,
-      currentPlayerIndex: nextPlayerIndex,
+      currentPlayerIndex: (this.state.currentPlayerIndex + 1) % this.state.players.length,
     };
-    // Start the turn timer
-    this._turnTimer.startTurn(this._turnTimeLimit, () =>
-      this._endPlayerTurnFailure(this.state.currentPlayerIndex),
-    );
-    this._areaUpdateFn(this.toModel());
   }
 }
