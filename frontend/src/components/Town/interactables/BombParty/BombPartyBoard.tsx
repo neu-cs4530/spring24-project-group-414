@@ -28,6 +28,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTextBoxText(event.currentTarget.value);
+    event.stopPropagation();
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

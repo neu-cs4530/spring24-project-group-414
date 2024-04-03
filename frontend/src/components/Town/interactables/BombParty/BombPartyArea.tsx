@@ -25,6 +25,7 @@ import GameArea from '../GameArea';
 import BombPartyBoard from './BombPartyBoard';
 import React from 'react';
 import PlayerController from '../../../../classes/PlayerController';
+import Interactable from '../../Interactable';
 
 /**
  * Overall BombParty frontend area that allows for the player to join a game,
@@ -35,9 +36,17 @@ export default function BombPartyArea({
 }: {
   interactableID: InteractableID;
 }): JSX.Element {
-  const [inGame, setInGame] = useState(true);
-  const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
   const townController = useTownController();
+  const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
+
+  // }, [townController, gameAreaController]);
+
+  const closeModal = () => {
+    console.log('close Modal');
+    //townController.unPause();
+  };
+
+  const [inGame, setInGame] = useState(true);
   // states to hold BombPartyAreaValues
   const [players, setPlayers] = useState<PlayerController[] | undefined>(
     gameAreaController.players,
@@ -54,6 +63,13 @@ export default function BombPartyArea({
 
   useEffect(() => {
     //functions to update states
+    if (gameAreaController) {
+      console.log('Pausing');
+      townController.pause();
+    } else {
+      console.log('unPause');
+      //townController.unPause();
+    }
     const updateGameState = () => {
       setPlayers(gameAreaController.players);
       setGameStatus(gameAreaController.status);
@@ -162,17 +178,19 @@ export default function BombPartyArea({
         {listPlayers}
         <Divider />
       </VStack>
-      <Container
-        bgColor='tomato'
-        minW='full'
-        border='solid'
-        borderWidth='5px'
-        borderRadius='5px'
-        borderColor='black'>
-        {status !== 'WAITING_TO_START' && (
-          <BombPartyBoard gameAreaController={gameAreaController} />
-        )}
-      </Container>
+      <Modal isOpen={gameAreaController != undefined} onClose={closeModal}>
+        <Container
+          bgColor='tomato'
+          minW='full'
+          border='solid'
+          borderWidth='5px'
+          borderRadius='5px'
+          borderColor='black'>
+          {status !== 'WAITING_TO_START' && (
+            <BombPartyBoard gameAreaController={gameAreaController} />
+          )}
+        </Container>
+      </Modal>
     </Container>
   );
 }

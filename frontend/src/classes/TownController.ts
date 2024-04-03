@@ -32,7 +32,7 @@ import {
   isConversationArea,
   isTicTacToeArea,
   isViewingArea,
-  isBombPartyArea
+  isBombPartyArea,
 } from '../types/TypeUtils';
 import BombPartyAreaController from './interactable/BombPartyAreaController';
 import ConnectFourAreaController from './interactable/ConnectFourAreaController';
@@ -288,14 +288,18 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   public pause(): void {
+    console.log('pause s1');
     if (!this._paused) {
+      console.log('pause s2');
       this._paused = true;
       this.emit('pause');
     }
   }
 
   public unPause(): void {
+    console.log('unpause s1');
     if (this._paused) {
+      console.log('unpause s2');
       this._paused = false;
       this.emit('unPause');
     }
@@ -633,10 +637,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(
               new ConnectFourAreaController(eachInteractable.id, eachInteractable, this),
             );
-          }  else if (isBombPartyArea(eachInteractable)) {
-              this._interactableControllers.push(
-                new BombPartyAreaController(eachInteractable.id, eachInteractable, this),
-              );
+          } else if (isBombPartyArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new BombPartyAreaController(eachInteractable.id, eachInteractable, this),
+            );
           }
         });
         this._userID = initialData.userID;
