@@ -25,7 +25,6 @@ import GameArea from './GameArea';
  * @see GameArea
  */
 export default class BombPartyGameArea extends GameArea<BombPartyGame> {
-  
   protected getType(): InteractableType {
     return 'BombPartyArea';
   }

@@ -118,7 +118,7 @@ export default class BombPartyAreaController extends GameAreaController<
     if (!this._model.game || this._model.game?.state.status !== 'IN_PROGRESS') {
       return undefined;
     }
-    return this._model.game.state.currentTimeLeft
+    return this._model.game.state.currentTimeLeft;
   }
 
   /**
@@ -137,7 +137,7 @@ export default class BombPartyAreaController extends GameAreaController<
   }
 
   /**
-   * Returns the number of lives for a given player 
+   * Returns the number of lives for a given player
    */
   public getPlayerLives(playerID: PlayerID): number {
     return this._model.game?.state.lives[playerID] ?? 0;

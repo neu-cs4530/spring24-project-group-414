@@ -30,7 +30,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
     return () => {
       gameAreaController.removeListener('stateUpdated', updateBoardState);
       gameAreaController.removeListener('turnChanged', updateBoardState);
-    }
+    };
   }, [gameAreaController]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,14 +41,18 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
     <StyledBombPartyBoard>
       <h1>{whoseTurnText}'s turn</h1>
       <h1>{currentPromptText}</h1>
-      <TextBox value={textBoxText} handleChange={handleChange} handleSubmit={async () => 
-        {
-        try {
-          await gameAreaController.makeMove(textBoxText)
-          return ''
-        } catch ({name, message}) { return message }
-        }
-      } />
+      <TextBox
+        value={textBoxText}
+        handleChange={handleChange}
+        handleSubmit={async () => {
+          try {
+            await gameAreaController.makeMove(textBoxText);
+            return '';
+          } catch ({ name, message }) {
+            return message;
+          }
+        }}
+      />
     </StyledBombPartyBoard>
   );
 }
