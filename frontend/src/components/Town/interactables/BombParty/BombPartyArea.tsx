@@ -138,6 +138,7 @@ export default function BombPartyArea({
     );
   console.log('start game');
 
+  //TODO: better indicator for who is the current player, we can remove the "current turn" from the input box, and instead just point to a player in the list of players.
   const listPlayers = (
     <SimpleGrid columns={3} gap={6}>
       <GridItem colSpan={2} alignContent='center'>
