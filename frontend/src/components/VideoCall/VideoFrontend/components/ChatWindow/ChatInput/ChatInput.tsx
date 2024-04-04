@@ -79,6 +79,7 @@ export default function ChatInput() {
     if(isTextareaFocused){
       coveyTownController.pause();
     }else{
+      console.log('chat input')
       coveyTownController.unPause();
     }
   }, [isTextareaFocused, coveyTownController]);
