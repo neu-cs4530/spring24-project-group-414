@@ -345,8 +345,8 @@ describe('ConversationAreaController hooks', () => {
   ): Ev extends EventNames<ConversationAreaEvents>
     ? ConversationAreaEvents[Ev]
     : Ev extends EventNames<BaseInteractableEventMap>
-    ? BaseInteractableEventMap[Ev]
-    : never {
+      ? BaseInteractableEventMap[Ev]
+      : never {
     const addedListeners = spy.mock.calls.filter(eachCall => eachCall[0] === eventName);
     if (addedListeners.length !== 1) {
       throw new Error(
@@ -356,8 +356,8 @@ describe('ConversationAreaController hooks', () => {
     return addedListeners[0][1] as unknown as Ev extends EventNames<ConversationAreaEvents>
       ? ConversationAreaEvents[Ev]
       : Ev extends EventNames<BaseInteractableEventMap>
-      ? BaseInteractableEventMap[Ev]
-      : never;
+        ? BaseInteractableEventMap[Ev]
+        : never;
   }
   function getSingleListenerRemoved<
     Ev extends EventNames<ConversationAreaEvents> | EventNames<BaseInteractableEventMap>,
@@ -366,8 +366,8 @@ describe('ConversationAreaController hooks', () => {
   ): Ev extends EventNames<ConversationAreaEvents>
     ? ConversationAreaEvents[Ev]
     : Ev extends EventNames<BaseInteractableEventMap>
-    ? BaseInteractableEventMap[Ev]
-    : never {
+      ? BaseInteractableEventMap[Ev]
+      : never {
     const removedListeners = removeListenerSpy.mock.calls.filter(
       eachCall => eachCall[0] === eventName,
     );
@@ -379,8 +379,8 @@ describe('ConversationAreaController hooks', () => {
     return removedListeners[0][1] as unknown as Ev extends EventNames<ConversationAreaEvents>
       ? ConversationAreaEvents[Ev]
       : Ev extends EventNames<BaseInteractableEventMap>
-      ? BaseInteractableEventMap[Ev]
-      : never;
+        ? BaseInteractableEventMap[Ev]
+        : never;
   }
   describe('useConversationAreaOccupants', () => {
     let hookReturnValue: PlayerController[];
@@ -528,8 +528,8 @@ describe('InteractableAreaController hooks', () => {
     return addedListeners[0][1] as unknown as Ev extends EventNames<ConversationAreaEvents>
       ? ConversationAreaEvents[Ev]
       : Ev extends EventNames<BaseInteractableEventMap>
-      ? BaseInteractableEventMap[Ev]
-      : never;
+        ? BaseInteractableEventMap[Ev]
+        : never;
   }
   function getSingleListenerRemoved<Ev extends EventNames<BaseInteractableEventMap>>(
     eventName: Ev,
@@ -545,8 +545,8 @@ describe('InteractableAreaController hooks', () => {
     return removedListeners[0][1] as unknown as Ev extends EventNames<ConversationAreaEvents>
       ? ConversationAreaEvents[Ev]
       : Ev extends EventNames<BaseInteractableEventMap>
-      ? BaseInteractableEventMap[Ev]
-      : never;
+        ? BaseInteractableEventMap[Ev]
+        : never;
   }
   describe('useInteractableAreaOccupants', () => {
     let hookReturnValue: PlayerController[];

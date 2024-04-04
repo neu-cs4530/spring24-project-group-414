@@ -52,7 +52,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
 
   return (
     <StyledBombPartyBoard>
-      <h1>{whoseTurnText}'s turn</h1>
+      <h1>{whoseTurnText}&apos;s turn</h1>
       <h1>{currentPromptText}</h1>
       <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} />
     </StyledBombPartyBoard>

@@ -28,14 +28,14 @@ export default function Leaderboard({ results }: { results: GameResult[] }): JSX
       result.scores[p1] > result.scores[p2]
         ? p1
         : result.scores[p2] > result.scores[p1]
-        ? p2
-        : undefined;
+          ? p2
+          : undefined;
     const loser =
       result.scores[p1] < result.scores[p2]
         ? p1
         : result.scores[p2] < result.scores[p1]
-        ? p2
-        : undefined;
+          ? p2
+          : undefined;
     if (winner) {
       winsLossesTiesByPlayer[winner] = {
         player: winner,
