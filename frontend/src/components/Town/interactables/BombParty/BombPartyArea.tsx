@@ -138,40 +138,32 @@ export default function BombPartyArea({
     );
   console.log('start game');
 
-  const listPlayers =
-    status !== 'IN_PROGRESS' ? (
-      <SimpleGrid columns={3} gap={6}>
-        <GridItem colSpan={2} alignContent='center'>
-          <List aria-label='list of players in the game'>
-            <VStack alignItems='stretch'>
-              {players &&
-                players.map((player, index) => (
-                  <ListItem key={index}>
-                    {townController.ourPlayer === player
-                      ? player.userName + ' (you)'
-                      : player.userName}{' '}
-                    {index === 0 && ' (host)'}
-                  </ListItem>
-                ))}
-            </VStack>
-          </List>
-        </GridItem>
-        <GridItem>
-          <VStack paddingTop='5px'>
-            {joinGameButton}
-            {startGameButton}
+  //TODO: better indicator for who is the current player, we can remove the "current turn" from the input box, and instead just point to a player in the list of players.
+  const listPlayers = (
+    <SimpleGrid columns={3} gap={6}>
+      <GridItem colSpan={2} alignContent='center'>
+        <List aria-label='list of players in the game'>
+          <VStack alignItems='stretch'>
+            {players &&
+              players.map((player, index) => (
+                <ListItem key={index}>
+                  {townController.ourPlayer === player
+                    ? player.userName + ' (you)'
+                    : player.userName}{' '}
+                  {index === 0 && ' (host)'}
+                </ListItem>
+              ))}
           </VStack>
-        </GridItem>
-      </SimpleGrid>
-    ) : (
-      <List aria-label='list of players in the game'>
-        <VStack alignItems='stretch' borderY={-1}>
-          {players &&
-            players.length > 0 &&
-            players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
+        </List>
+      </GridItem>
+      <GridItem>
+        <VStack paddingTop='5px'>
+          {status !== 'IN_PROGRESS' && joinGameButton}
+          {status !== 'IN_PROGRESS' && startGameButton}
         </VStack>
-      </List>
-    );
+      </GridItem>
+    </SimpleGrid>
+  );
   console.log('list Players');
 
   return (
