@@ -1,5 +1,4 @@
 import { chakra, Container, Input, VStack } from '@chakra-ui/react';
-import { input } from '@testing-library/user-event/dist/types/utils';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
 import { InteractableID } from '../../../../types/CoveyTownSocket';

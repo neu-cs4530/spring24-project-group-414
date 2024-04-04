@@ -26,6 +26,7 @@ import BombPartyBoard from './BombPartyBoard';
 import React from 'react';
 import PlayerController from '../../../../classes/PlayerController';
 
+// TESTING WHAT COMMIT
 /**
  * Overall BombParty frontend area that allows for the player to join a game,
  * @returns
@@ -42,9 +43,6 @@ export default function BombPartyArea({
   const [players, setPlayers] = useState<PlayerController[]>(gameAreaController.players);
   const [isJoining, setIsJoining] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  const [isLBModalOpen, setIsLBModalOpen] = useState(false);
-  const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
   const [status, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   // states to hold game values from controller
   const [, setHistory] = useState<GameResult[]>(gameAreaController.history);
@@ -54,6 +52,13 @@ export default function BombPartyArea({
   const toast = useToast();
 
   useEffect(() => {
+    if (gameAreaController) {
+      console.log('Pausing');
+      townController.pause();
+    } else {
+      console.log('unPause');
+      townController.unPause();
+    }
     //functions to update states
     const updateGameState = () => {
       setPlayers(gameAreaController.players);
@@ -79,7 +84,9 @@ export default function BombPartyArea({
       // TODO: reset this in the proper way
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
-    gameAreaController.addListener('gameEnd', onGameEnd);
+    gameAreaController.addListener('gameEnd', () => {
+      onGameEnd();
+    });
     return () => {
       gameAreaController.removeListener('gameUpdated', updateGameState);
       gameAreaController.removeListener('gameEnd', onGameEnd);
@@ -138,32 +145,40 @@ export default function BombPartyArea({
     );
   console.log('start game');
 
-  //TODO: better indicator for who is the current player, we can remove the "current turn" from the input box, and instead just point to a player in the list of players.
-  const listPlayers = (
-    <SimpleGrid columns={3} gap={6}>
-      <GridItem colSpan={2} alignContent='center'>
-        <List aria-label='list of players in the game'>
-          <VStack alignItems='stretch'>
-            {players &&
-              players.map((player, index) => (
-                <ListItem key={index}>
-                  {townController.ourPlayer === player
-                    ? player.userName + ' (you)'
-                    : player.userName}{' '}
-                  {index === 0 && ' (host)'}
-                </ListItem>
-              ))}
+  const listPlayers =
+    status !== 'IN_PROGRESS' ? (
+      <SimpleGrid columns={3} gap={6}>
+        <GridItem colSpan={2} alignContent='center'>
+          <List aria-label='list of players in the game'>
+            <VStack alignItems='stretch'>
+              {players &&
+                players.map((player, index) => (
+                  <ListItem key={index}>
+                    {townController.ourPlayer === player
+                      ? player.userName + ' (you)'
+                      : player.userName}{' '}
+                    {index === 0 && ' (host)'}
+                  </ListItem>
+                ))}
+            </VStack>
+          </List>
+        </GridItem>
+        <GridItem>
+          <VStack paddingTop='5px'>
+            {joinGameButton}
+            {startGameButton}
           </VStack>
-        </List>
-      </GridItem>
-      <GridItem>
-        <VStack paddingTop='5px'>
-          {status !== 'IN_PROGRESS' && joinGameButton}
-          {status !== 'IN_PROGRESS' && startGameButton}
+        </GridItem>
+      </SimpleGrid>
+    ) : (
+      <List aria-label='list of players in the game'>
+        <VStack alignItems='stretch' borderY={-1}>
+          {players &&
+            players.length > 0 &&
+            players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
         </VStack>
-      </GridItem>
-    </SimpleGrid>
-  );
+      </List>
+    );
   console.log('list Players');
 
   return (

@@ -145,6 +145,9 @@ export default function GameAreaWrapper(): JSX.Element {
       controller.leaveGame();
     }
   }, [townController, gameArea]);
+  if (townController.paused) {
+    townController.unPause();
+  }
 
   if (gameArea) {
     // TODO: this is repeated code from .useInteractableAreaController(), is this required?

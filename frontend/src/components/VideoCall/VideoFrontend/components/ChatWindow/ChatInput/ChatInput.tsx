@@ -76,14 +76,6 @@ export default function ChatInput() {
   const {conversation, isChatWindowOpen, setIsChatWindowOpen} = useChatContext();
 
   useEffect(() => {
-    if(isTextareaFocused){
-      coveyTownController.pause();
-    }else{
-      console.log('chat input')
-      coveyTownController.unPause();
-    }
-  }, [isTextareaFocused, coveyTownController]);
-  useEffect(() => {
     if (isChatWindowOpen) {
       // When the chat window is opened, we will focus on the text input.
       // This is so the user doesn't have to click on it to begin typing a message.

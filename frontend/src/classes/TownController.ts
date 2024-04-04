@@ -288,18 +288,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   public pause(): void {
-    console.log('pause s1');
     if (!this._paused) {
-      console.log('pause s2');
       this._paused = true;
       this.emit('pause');
     }
   }
 
   public unPause(): void {
-    console.log('unpause s1');
     if (this._paused) {
-      console.log('unpause s2');
       this._paused = false;
       this.emit('unPause');
     }
