@@ -1,5 +1,4 @@
 import { chakra, Container, Input, VStack } from '@chakra-ui/react';
-import { input } from '@testing-library/user-event/dist/types/utils';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
 import { InteractableID } from '../../../../types/CoveyTownSocket';
@@ -53,7 +52,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
 
   return (
     <StyledBombPartyBoard>
-      <h1>{whoseTurnText}'s turn</h1>
+      <h1>{whoseTurnText}&apos;s turn</h1>
       <h1>{currentPromptText}</h1>
       <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} />
     </StyledBombPartyBoard>

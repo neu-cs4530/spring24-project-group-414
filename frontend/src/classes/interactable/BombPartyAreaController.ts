@@ -37,7 +37,7 @@ export default class BombPartyAreaController extends GameAreaController<
   }
 
   get playerID(): string {
-    return this._townController.ourPlayer.id
+    return this._townController.ourPlayer.id;
   }
 
   /**
@@ -111,7 +111,7 @@ export default class BombPartyAreaController extends GameAreaController<
   /**
    * Gets the current substring prompt for the player to complete with a word
    */
-  get currentPrompt(): String | undefined {
+  get currentPrompt(): string | undefined {
     if (!this._model.game || this._model.game?.state.status !== 'IN_PROGRESS') {
       return undefined;
     }
