@@ -15,6 +15,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { GenericGameAreaController } from '../../../classes/interactable/GameAreaController';
@@ -28,6 +29,7 @@ import ConnectFourArea from './ConnectFour/ConnectFourArea';
 import GameAreaInteractable from './GameArea';
 import Leaderboard from './Leaderboard';
 import TicTacToeArea from './TicTacToe/TicTacToeArea';
+import BombPartyAreaController from '../../../classes/interactable/BombPartyAreaController';
 
 export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
 
@@ -49,6 +51,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
   const gameAreaController =
     useInteractableAreaController<GenericGameAreaController>(interactableID);
   const townController = useTownController();
+  const toast = useToast();
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
   useEffect(() => {
@@ -103,7 +106,29 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
           ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
             <TicTacToeArea interactableID={interactableID} />
           ) : gameAreaController.toInteractableAreaModel().type === 'BombPartyArea' ? (
-            <BombPartyArea interactableID={interactableID} />
+            <BombPartyArea
+              interactableID={interactableID}
+              onGameEnd={() => {
+                if (gameAreaController instanceof BombPartyAreaController) {
+                  const winner = gameAreaController.winner;
+                  if (!winner) {
+                    // nothing
+                  } else if (winner === townController.ourPlayer) {
+                    toast({
+                      title: 'Game over',
+                      description: 'You won!',
+                      status: 'success',
+                    });
+                  } else {
+                    toast({
+                      title: 'Game over',
+                      description: winner + ` is the winner`,
+                      status: 'error',
+                    });
+                  }
+                }
+              }}
+            />
           ) : (
             <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
           )}
@@ -111,7 +136,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
         <Box
           style={{
             // TODO: change height based on area.
-            height: '400px',
+            height: '600px',
             overflowY: 'scroll',
           }}>
           <div

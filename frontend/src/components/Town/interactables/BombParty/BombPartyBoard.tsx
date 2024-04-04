@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
 import { InteractableID } from '../../../../types/CoveyTownSocket';
 import { TextBox } from './Components/TextBox';
+import CSS from 'csstype';
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
 };
@@ -50,10 +51,23 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
     }
   };
 
+  const prompStyles: CSS.Properties = {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    position: 'static',
+    right: 0,
+    bottom: '2px',
+    padding: '2px',
+    fontFamily: 'sans-serif',
+    fontSize: '24px',
+    textAlign: 'center',
+  };
+
   return (
     <StyledBombPartyBoard>
       <h1>{whoseTurnText}&apos;s turn</h1>
-      <h1>{currentPromptText}</h1>
+      <b>
+        <p style={prompStyles}>{'prompt:  ' + currentPromptText}</p>
+      </b>
       <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} />
     </StyledBombPartyBoard>
   );

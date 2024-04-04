@@ -33,8 +33,10 @@ import PlayerController from '../../../../classes/PlayerController';
  */
 export default function BombPartyArea({
   interactableID,
+  onGameEnd,
 }: {
   interactableID: InteractableID;
+  onGameEnd: () => void;
 }): JSX.Element {
   const [inGame, setInGame] = useState(true);
   const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
@@ -63,25 +65,6 @@ export default function BombPartyArea({
     const updateGameState = () => {
       setPlayers(gameAreaController.players);
       setGameStatus(gameAreaController.status);
-    };
-    const onGameEnd = () => {
-      const winner = gameAreaController.winner;
-      if (!winner) {
-        // nothing
-      } else if (winner === townController.ourPlayer) {
-        toast({
-          title: 'Game over',
-          description: 'You won!',
-          status: 'success',
-        });
-      } else {
-        toast({
-          title: 'Game over',
-          description: winner + ` is the winner`,
-          status: 'error',
-        });
-      }
-      // TODO: reset this in the proper way
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
     gameAreaController.addListener('gameEnd', () => {
@@ -188,15 +171,19 @@ export default function BombPartyArea({
         {listPlayers}
         <Divider />
       </VStack>
-      <Container
-        bgColor='tomato'
-        minW='full'
-        border='solid'
-        borderWidth='5px'
-        borderRadius='5px'
-        borderColor='black'>
-        {status === 'IN_PROGRESS' && <BombPartyBoard gameAreaController={gameAreaController} />}
-      </Container>
+      {status === 'IN_PROGRESS' && (
+        <Container
+          bgColor='salmon'
+          width='500px'
+          height='400px'
+          minW='full'
+          border='solid'
+          borderWidth='5px'
+          borderRadius='5px'
+          borderColor='black'>
+          <BombPartyBoard gameAreaController={gameAreaController} />
+        </Container>
+      )}
     </Container>
   );
 }
