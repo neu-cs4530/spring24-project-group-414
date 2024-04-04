@@ -107,8 +107,7 @@ export default function BombPartyArea({
           setIsJoining(false);
         }}
         disabled={isJoining}
-        isLoading={isJoining}
-      >
+        isLoading={isJoining}>
         Join New Game
       </Button>
     );
@@ -131,8 +130,7 @@ export default function BombPartyArea({
           setIsStarting(false);
         }}
         disabled={isStarting}
-        isLoading={isStarting}
-      >
+        isLoading={isStarting}>
         Start Game
       </Button>
     ) : (
@@ -169,8 +167,12 @@ export default function BombPartyArea({
       <List aria-label='list of players in the game'>
         <VStack alignItems='stretch' borderY={-1}>
           {players &&
-            players.length > 0 &&
-            players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
+            players.map((player, index) => (
+              <ListItem key={index}>
+                {townController.ourPlayer === player ? player.userName + ' (you)' : player.userName}{' '}
+                {index === 0 && ' (host)'}
+              </ListItem>
+            ))}
         </VStack>
       </List>
     );
@@ -189,8 +191,7 @@ export default function BombPartyArea({
         border='solid'
         borderWidth='5px'
         borderRadius='5px'
-        borderColor='black'
-      >
+        borderColor='black'>
         {status === 'IN_PROGRESS' && <BombPartyBoard gameAreaController={gameAreaController} />}
       </Container>
     </Container>

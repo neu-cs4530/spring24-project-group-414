@@ -1,4 +1,5 @@
-import { chakra, Container, VStack } from '@chakra-ui/react';
+import { chakra, Container, Input, VStack } from '@chakra-ui/react';
+import { input } from '@testing-library/user-event/dist/types/utils';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
 import { InteractableID } from '../../../../types/CoveyTownSocket';
@@ -17,7 +18,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
 
   const [whoseTurnText, setWhoseTurnText] = useState(gameAreaController.whoseTurn?.userName);
   const [currentPromptText, setCurrentPromptText] = useState(gameAreaController.currentPrompt);
-  const [textBoxText, setTextBoxText] = useState('');
+  const [inputText, setinputText] = useState('');
 
   useEffect(() => {
     const updateBoardState = () => {
@@ -34,25 +35,27 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
   }, [gameAreaController]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTextBoxText(event.currentTarget.value);
+    setinputText(event.currentTarget.value);
+  };
+
+  const handleKeyPress = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      try {
+        await gameAreaController.makeMove(inputText);
+        console.log(`entered: ${inputText}`);
+        setinputText('');
+        return '';
+      } catch ({ name, message }) {
+        return message;
+      }
+    }
   };
 
   return (
     <StyledBombPartyBoard>
       <h1>{whoseTurnText}'s turn</h1>
       <h1>{currentPromptText}</h1>
-      <TextBox
-        value={textBoxText}
-        handleChange={handleChange}
-        handleSubmit={async () => {
-          try {
-            await gameAreaController.makeMove(textBoxText);
-            return '';
-          } catch ({ name, message }) {
-            return message;
-          }
-        }}
-      />
+      <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} />
     </StyledBombPartyBoard>
   );
 }
