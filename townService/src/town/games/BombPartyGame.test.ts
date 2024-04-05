@@ -174,8 +174,8 @@ describe('BombPartGame', () => {
           const player2 = createPlayerForTesting();
           game.join(player2);
           game.startGame(player1);
-          expect(game.state.lives[player1.id]).toBe(game.state.maxLives);
-          expect(game.state.lives[player2.id]).toBe(game.state.maxLives);
+          expect(game.state.lives[player1.id]).toBe(game.state.settings.maxLives);
+          expect(game.state.lives[player2.id]).toBe(game.state.settings.maxLives);
           expect(game.state.status).toBe('IN_PROGRESS');
           game.leave(player1);
           expect(game.state.lives[player1.id]).toBe(0);

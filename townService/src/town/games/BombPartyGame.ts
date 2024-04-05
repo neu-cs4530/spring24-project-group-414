@@ -2,6 +2,8 @@ import InvalidParametersError, {
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
+  GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE,
+  GAME_SETTINGS_NOT_VALID_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_GAME_HOST_MESSAGE,
@@ -11,8 +13,10 @@ import Player from '../../lib/Player';
 import {
   BombPartyGameState,
   BombPartyMove,
+  BombPartySettings,
   GameInstance,
   GameMove,
+  GameSettingsChange,
   PlayerID,
 } from '../../types/CoveyTownSocket';
 import BombPartyDictionary from './BombPartyDictionary';
@@ -28,9 +32,6 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
 
   // The minimum number of players required to start the game.
   MIN_PLAYERS = 2;
-
-  // The time limit for each player's turn, in milliseconds.
-  private _turnTimeLimit = 25000;
 
   // The timer used to keep track of the time remaining for each player's turn, and ends the turn if the time runs out.
   private _turnTimer: BombPartyTimer;
@@ -56,8 +57,12 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       players: [],
       currentPlayerIndex: 0,
       currentSubstring: '',
-      maxLives: 3,
       currentTimeLeft: 10,
+      settings: {
+        maxLives: 3,
+        turnLength: 25000,
+        decreasingTurnLength: false,
+      },
     });
     this._turnTimer = turnTimer;
     this._dictionary = dictionary;
@@ -157,7 +162,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
         break;
       case 'IN_PROGRESS':
         // Implement deduction of lives for removed player here, then check if the game is over
-        this._decreaseLife(player.id, this.state.maxLives);
+        this._decreaseLife(player.id, this.state.settings.maxLives);
         if (this._isGameOver()) {
           this.state = {
             ...this.state,
@@ -201,6 +206,22 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this._applyMove(newMove);
   }
 
+  public changeSettings(settings: GameSettingsChange<BombPartySettings>): void {
+    if (settings.playerID !== this.state.players[0]) {
+      throw new InvalidParametersError(PLAYER_NOT_GAME_HOST_MESSAGE);
+    }
+    if (this.state.status !== 'WAITING_FOR_PLAYERS' && this.state.status !== 'WAITING_TO_START') {
+      throw new InvalidParametersError(GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE);
+    }
+    if (settings.settings.maxLives < 1 || settings.settings.turnLength < 5000) {
+      throw new InvalidParametersError(GAME_SETTINGS_NOT_VALID_MESSAGE);
+    }
+    this.state = {
+      ...this.state,
+      settings: settings.settings,
+    };
+  }
+
   /**
    * Ensures that the move is valid in the current game state.
    *
@@ -241,7 +262,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       };
       // Start the turn timer
       this._turnTimer.startTurn(
-        this._turnTimeLimit,
+        this.state.settings.turnLength,
         () => this._endPlayerTurnFailure(this.state.currentPlayerIndex),
         () => {
           this.state = {
@@ -294,7 +315,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
         ...this.state,
         lives: {
           ...this.state.lives,
-          [player]: this.state.maxLives,
+          [player]: this.state.settings.maxLives,
         },
       };
     });
@@ -306,7 +327,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     };
     // Start the turn timer
     this._turnTimer.startTurn(
-      this._turnTimeLimit,
+      this.state.settings.turnLength,
       () => this._endPlayerTurnFailure(this.state.currentPlayerIndex),
       () => {
         this.state = {
@@ -357,7 +378,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     };
     // Start the turn timer
     this._turnTimer.startTurn(
-      this._turnTimeLimit,
+      this.state.settings.turnLength,
       () => this._endPlayerTurnFailure(this.state.currentPlayerIndex),
       () => {
         this.state = {

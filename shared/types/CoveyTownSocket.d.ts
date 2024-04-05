@@ -98,6 +98,12 @@ export interface GameMove<MoveType> {
   move: MoveType;
 }
 
+export interface GameSettingsChange<SettingsType> {
+  playerID: PlayerID;
+  gameID: GameInstanceID;
+  settings: SettingsType;
+}
+
 export type TicTacToeGridPosition = 0 | 1 | 2;
 
 /**
@@ -152,13 +158,25 @@ export interface BombPartyGameState extends WinnableGameState {
   currentPlayerIndex: number;
   // The number of lives remaning for each seat
   lives: { [player: PlayerID]: number };
-  // The maximum number of lives a player can have
-  maxLives: number;
   // The current substring that players are trying to complete
   currentSubstring: string;
   // the current time remaining in the player's turn (milliseconds) 
-  // TODO: figure out a better type for this
   currentTimeLeft: number
+  // The settings for this game
+  settings: BombPartySettings;
+}
+
+/**
+ * Type for the settings of a BombParty game
+ */
+export interface BombPartySettings {
+  // The starting number of lives for each player
+  maxLives: number;
+  // The maximum turn length in milliseconds.
+  // Must be at least 5000 (5 seconds)
+  turnLength: number;
+  // Setting for decreasing turn length with each successful turn. Time resets when a player fails.
+  decreasingTurnLength: boolean;
 }
 
 /**
@@ -252,7 +270,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BombPartyMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BombPartyMove> | StartGameCommand | LeaveGameCommand | GameSettingsCommand<BombPartySettings>;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -272,6 +290,11 @@ export interface GameMoveCommand<MoveType> {
   type: 'GameMove';
   gameID: GameInstanceID;
   move: MoveType;
+}
+export interface GameSettingsCommand<SettingsType> {
+  type: 'GameSettings';
+  gameID: GameInstanceID;
+  settings: SettingsType;
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
