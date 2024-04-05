@@ -139,42 +139,35 @@ export default function BombPartyArea({
     );
   console.log('start game');
 
-  const listPlayers =
-    status !== 'IN_PROGRESS' ? (
-      <SimpleGrid columns={3} gap={6}>
-        <GridItem colSpan={2} alignContent='center'>
-          <List aria-label='list of players in the game'>
-            <VStack alignItems='stretch'>
-              {players &&
-                players.map((player, index) => (
-                  <ListItem key={index}>
-                    {townController.ourPlayer === player
-                      ? player.userName + ' (you)'
-                      : player
-                      ? player.userName
-                      : ''}
-                    {index === 0 && ' (host)'}
-                  </ListItem>
-                ))}
-            </VStack>
-          </List>
-        </GridItem>
-        <GridItem>
-          <VStack paddingTop='5px'>
-            {joinGameButton}
-            {startGameButton}
-          </VStack>
-        </GridItem>
-      </SimpleGrid>
-    ) : (
-      <List aria-label='list of players in the game'>
-        <VStack alignItems='stretch' borderY={-1}>
-          {players &&
-            players.length > 0 &&
-            players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
+  const listPlayersItems =
+    players &&
+    players.map((player, index) => (
+      <ListItem key={index}>
+        {townController.ourPlayer === player
+          ? player.userName + ' (you)'
+          : player
+          ? player.userName
+          : ''}
+        {index === 0 && ' (host) '}
+        lives: {gameAreaController.getPlayerLives(player.id)}
+      </ListItem>
+    ));
+
+  const listPlayers = (
+    <SimpleGrid columns={3} gap={6}>
+      <GridItem colSpan={2} alignContent='center'>
+        <List aria-label='list of players in the game'>
+          <VStack alignItems='stretch'>{listPlayersItems}</VStack>
+        </List>
+      </GridItem>
+      <GridItem>
+        <VStack paddingTop='5px'>
+          {joinGameButton}
+          {startGameButton}
         </VStack>
-      </List>
-    );
+      </GridItem>
+    </SimpleGrid>
+  );
   console.log('list Players');
 
   return (
