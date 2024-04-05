@@ -33,10 +33,8 @@ import PlayerController from '../../../../classes/PlayerController';
  */
 export default function BombPartyArea({
   interactableID,
-  onGameEnd,
 }: {
   interactableID: InteractableID;
-  onGameEnd: () => void;
 }): JSX.Element {
   const [inGame, setInGame] = useState(true);
   const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
@@ -54,6 +52,7 @@ export default function BombPartyArea({
   const toast = useToast();
 
   useEffect(() => {
+    console.log('Player List: ' + gameAreaController.players);
     if (gameAreaController) {
       console.log('Pausing');
       townController.pause();
@@ -64,22 +63,34 @@ export default function BombPartyArea({
     //functions to update states
     const updateGameState = () => {
       setPlayers(gameAreaController.players);
-      setGameStatus(gameAreaController.status);
+      setGameStatus(gameAreaController.status || 'WAITING_FOR_PLAYERS');
+    };
+    const onGameEnd = () => {
+      const winner = gameAreaController.winner;
+      if (winner === townController.ourPlayer) {
+        toast({
+          title: 'Game over',
+          description: 'You won!',
+          status: 'success',
+        });
+      } else {
+        toast({
+          title: 'Game over',
+          description: `${winner?.userName} won!`,
+          status: 'error',
+        });
+      }
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
-    gameAreaController.addListener('gameEnd', () => {
-      onGameEnd();
-    });
+    gameAreaController.addListener('gameEnd', onGameEnd);
     return () => {
       gameAreaController.removeListener('gameUpdated', updateGameState);
       gameAreaController.removeListener('gameEnd', onGameEnd);
-      gameAreaController.addListener('gameUpdated', updateGameState);
     };
   }, [gameAreaController, townController, toast]);
 
-  //(inGame && status === 'WAITING_TO_START')
   const joinGameButton =
-    status === 'OVER' || status === 'IN_PROGRESS' ? (
+    status === 'IN_PROGRESS' ? (
       <></>
     ) : (
       <Button
@@ -139,7 +150,9 @@ export default function BombPartyArea({
                   <ListItem key={index}>
                     {townController.ourPlayer === player
                       ? player.userName + ' (you)'
-                      : player.userName}{' '}
+                      : player
+                      ? player.userName
+                      : ''}
                     {index === 0 && ' (host)'}
                   </ListItem>
                 ))}
