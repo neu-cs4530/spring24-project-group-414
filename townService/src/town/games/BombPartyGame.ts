@@ -49,6 +49,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     turnTimer: BombPartyTimer,
     dictionary: BombPartyDictionary,
     areaUpdateFn: (model: GameInstance<BombPartyGameState>) => void,
+    priorGame?: BombPartyGame,
   ) {
     super({
       moves: [],
@@ -66,6 +67,9 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     });
     this._turnTimer = turnTimer;
     this._dictionary = dictionary;
+    if (priorGame) {
+      this._changeSettings(priorGame.state.settings);
+    }
     this._areaUpdateFn = areaUpdateFn;
   }
 
@@ -210,15 +214,19 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     if (settings.playerID !== this.state.players[0]) {
       throw new InvalidParametersError(PLAYER_NOT_GAME_HOST_MESSAGE);
     }
+    this._changeSettings(settings.settings);
+  }
+
+  protected _changeSettings(settings: BombPartySettings): void {
     if (this.state.status !== 'WAITING_FOR_PLAYERS' && this.state.status !== 'WAITING_TO_START') {
       throw new InvalidParametersError(GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE);
     }
-    if (settings.settings.maxLives < 1 || settings.settings.turnLength < 5000) {
+    if (settings.maxLives < 1 || settings.turnLength < 5000) {
       throw new InvalidParametersError(GAME_SETTINGS_NOT_VALID_MESSAGE);
     }
     this.state = {
       ...this.state,
-      settings: settings.settings,
+      settings,
     };
   }
 
