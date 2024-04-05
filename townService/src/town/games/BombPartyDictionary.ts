@@ -58,7 +58,8 @@ export default class BombPartyDictionary {
    * @param word the word to validate.
    */
   public validateWord(word: string): boolean {
-    return !this._wordHistory.includes(word) && this._dict[word];
+    const lowerCaseWord = word.toLowerCase();
+    return !this._wordHistory.includes(lowerCaseWord) && this._dict[lowerCaseWord];
   }
 
   /**
@@ -71,7 +72,7 @@ export default class BombPartyDictionary {
    */
   public addWordToHistory(word: string): void {
     if (this.validateWord(word)) {
-      this._wordHistory = [...this._wordHistory, word];
+      this._wordHistory = [...this._wordHistory, word.toLowerCase()];
     }
   }
 

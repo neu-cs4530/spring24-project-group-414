@@ -5,10 +5,12 @@ jest.useFakeTimers();
 describe('BombPartyTimer', () => {
   let timer: BombPartyTimer;
   let endTurnCallback: jest.Mock<void, []>;
+  let tickCallback: jest.Mock<void, []>;
 
   beforeEach(() => {
     timer = new BombPartyTimer();
     endTurnCallback = jest.fn();
+    tickCallback = jest.fn();
   });
 
   afterEach(() => {
@@ -18,53 +20,54 @@ describe('BombPartyTimer', () => {
 
   describe('startTurn', () => {
     it('should start the turn and call the endTurnCallBack after the specified time', () => {
-      timer.startTurn(500, endTurnCallback);
-      jest.runAllTimers();
+      timer.startTurn(1000, endTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1000);
       expect(endTurnCallback).toHaveBeenCalled();
     });
 
     it('should not call the endTurnCallBack if turn is ended prematurely', () => {
-      timer.startTurn(500, endTurnCallback);
+      timer.startTurn(1000, endTurnCallback, tickCallback);
       timer.endTurn();
-      jest.runAllTimers();
+      jest.advanceTimersByTime(1000);
       expect(endTurnCallback).not.toHaveBeenCalled();
     });
 
     it('should not start the turn if there is already a turn in progress', () => {
-      timer.startTurn(500, endTurnCallback);
+      timer.startTurn(1000, endTurnCallback, tickCallback);
       const secondEndTurnCallback = jest.fn();
-      timer.startTurn(500, secondEndTurnCallback);
-      jest.runAllTimers();
+      timer.startTurn(1000, secondEndTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1000);
       expect(secondEndTurnCallback).not.toHaveBeenCalled();
     });
     it('should start after being stopped and started again', () => {
-      timer.startTurn(500, endTurnCallback);
+      timer.startTurn(1000, endTurnCallback, tickCallback);
       timer.endTurn();
-      timer.startTurn(500, endTurnCallback);
-      jest.runAllTimers();
+      timer.startTurn(1000, endTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1000);
       expect(endTurnCallback).toHaveBeenCalled();
     });
     it('should start after timing out and started again', () => {
-      timer.startTurn(500, endTurnCallback);
-      jest.runAllTimers();
-      timer.startTurn(500, endTurnCallback);
-      jest.runAllTimers();
+      timer.startTurn(1000, endTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1001);
+      expect(endTurnCallback).toHaveBeenCalled();
+      timer.startTurn(1000, endTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1001);
       expect(endTurnCallback).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('endTurn', () => {
     it('should end the current turn', () => {
-      timer.startTurn(500, endTurnCallback);
+      timer.startTurn(1000, endTurnCallback, tickCallback);
       timer.endTurn();
-      jest.runAllTimers();
+      jest.advanceTimersByTime(1000);
       expect(endTurnCallback).not.toHaveBeenCalled();
     });
   });
 
   describe('turnLength', () => {
     it('should return the length of the current turn', () => {
-      timer.startTurn(1000, endTurnCallback);
+      timer.startTurn(1000, endTurnCallback, tickCallback);
       expect(timer.turnLength).toBe(1000);
     });
 

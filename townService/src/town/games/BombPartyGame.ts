@@ -240,8 +240,16 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
         currentPlayerIndex: nextPlayerIndex,
       };
       // Start the turn timer
-      this._turnTimer.startTurn(this._turnTimeLimit, () =>
-        this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+      this._turnTimer.startTurn(
+        this._turnTimeLimit,
+        () => this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+        () => {
+          this.state = {
+            ...this.state,
+            currentTimeLeft: this._turnTimer.remainingTime,
+          };
+          this._areaUpdateFn(this.toModel());
+        },
       );
     } else {
       move.valid = false;
@@ -293,12 +301,20 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     // Randomly select the first player
     this.state = {
       ...this.state,
-      currentPlayerIndex: Math.floor(Math.random() * (this.state.players.length - 1)),
+      currentPlayerIndex: Math.floor(Math.random() * this.state.players.length),
       currentSubstring: this._dictionary.generateSubstring(),
     };
     // Start the turn timer
-    this._turnTimer.startTurn(this._turnTimeLimit, () =>
-      this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+    this._turnTimer.startTurn(
+      this._turnTimeLimit,
+      () => this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+      () => {
+        this.state = {
+          ...this.state,
+          currentTimeLeft: this._turnTimer.remainingTime,
+        };
+        this._areaUpdateFn(this.toModel());
+      },
     );
   }
 
@@ -340,8 +356,16 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       currentPlayerIndex: nextPlayerIndex,
     };
     // Start the turn timer
-    this._turnTimer.startTurn(this._turnTimeLimit, () =>
-      this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+    this._turnTimer.startTurn(
+      this._turnTimeLimit,
+      () => this._endPlayerTurnFailure(this.state.currentPlayerIndex),
+      () => {
+        this.state = {
+          ...this.state,
+          currentTimeLeft: this._turnTimer.remainingTime,
+        };
+        this._areaUpdateFn(this.toModel());
+      },
     );
     this._areaUpdateFn(this.toModel());
   }
