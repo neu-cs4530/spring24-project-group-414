@@ -12,10 +12,6 @@ export type BombPartyGameProps = {
 const StyledBombPartyBoard = chakra(Container, {});
 
 export default function BombPartyBoard({ gameAreaController }: BombPartyGameProps): JSX.Element {
-  // const checkWord = (word: string): boolean => {
-  //   return word == 'car';
-  // };
-
   const [whoseTurnText, setWhoseTurnText] = useState(gameAreaController.whoseTurn?.userName);
   const [currentPromptText, setCurrentPromptText] = useState(gameAreaController.currentPrompt);
   const [inputText, setinputText] = useState('');
@@ -51,7 +47,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
     }
   };
 
-  const prompStyles: CSS.Properties = {
+  const promptStyles: CSS.Properties = {
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
     position: 'static',
     right: 0,
@@ -66,7 +62,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
     <StyledBombPartyBoard>
       <h1>{whoseTurnText}&apos;s turn</h1>
       <b>
-        <p style={prompStyles}>{'prompt:  ' + currentPromptText}</p>
+        <p style={promptStyles}>{'prompt:  ' + currentPromptText}</p>
       </b>
       <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} />
     </StyledBombPartyBoard>

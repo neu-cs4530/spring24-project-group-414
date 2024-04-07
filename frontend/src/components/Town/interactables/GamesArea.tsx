@@ -106,6 +106,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
           ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
             <TicTacToeArea interactableID={interactableID} />
           ) : gameAreaController.toInteractableAreaModel().type === 'BombPartyArea' ? (
+            //TODO: move onGameEnd
             <BombPartyArea
               interactableID={interactableID}
               onGameEnd={() => {

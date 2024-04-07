@@ -1,32 +1,28 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
+  Flex,
+  Box,
   Button,
   Container,
   Divider,
   GridItem,
-  HStack,
   List,
   ListItem,
-  Select,
   SimpleGrid,
   useToast,
   VStack,
+  WrapItem,
+  HStack,
+  Center,
 } from '@chakra-ui/react';
-import { useCallback, useEffect, useState } from 'react';
+import {  useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
-import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
+import {  useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import { InteractableID, GameResult, GameStatus } from '../../../../types/CoveyTownSocket';
-import GameArea from '../GameArea';
 import BombPartyBoard from './BombPartyBoard';
 import React from 'react';
 import PlayerController from '../../../../classes/PlayerController';
 
-// TESTING WHAT COMMIT
 /**
  * Overall BombParty frontend area that allows for the player to join a game,
  * @returns
@@ -36,7 +32,7 @@ export default function BombPartyArea({
 }: {
   interactableID: InteractableID;
 }): JSX.Element {
-  const [inGame, setInGame] = useState(true);
+  const [inGame, setInGame] = useState(true); // NOTE: what is this for?
   const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
   const townController = useTownController();
   // states to hold BombPartyAreaValues
@@ -90,10 +86,11 @@ export default function BombPartyArea({
   }, [gameAreaController, townController, toast]);
 
   const joinGameButton =
-    status === 'IN_PROGRESS' ? (
+    status === 'IN_PROGRESS' || gameAreaController.isPlayer ? (
       <></>
     ) : (
       <Button
+        flex='1'
         onClick={async () => {
           setIsJoining(true);
           try {
@@ -112,11 +109,11 @@ export default function BombPartyArea({
         Join New Game
       </Button>
     );
-  console.log('Join Game');
 
   const startGameButton =
     inGame && status === 'WAITING_TO_START' ? (
       <Button
+        flex='1'
         onClick={async () => {
           setIsStarting(true);
           try {
@@ -130,60 +127,46 @@ export default function BombPartyArea({
           }
           setIsStarting(false);
         }}
-        disabled={isStarting}
+        disabled={isStarting || !gameAreaController.isHost}
         isLoading={isStarting}>
-        Start Game
+        { gameAreaController.isHost ? 'Start Game' : 'Waiting for host to start...' }
       </Button>
     ) : (
       <></>
     );
   console.log('start game');
 
+  const playerIcon = (player: PlayerController, idx: number) => {
+  return <Box 
+    minW='50px'
+    border='solid' 
+    borderWidth='thin'
+    borderRadius='md'
+    borderColor={townController.ourPlayer === player ? 'blueviolet' : 'white'}
+    padding='4px'
+    key={idx} >
+    {player.userName}{gameAreaController.isHost && ' (host)'}
+    <Divider />
+    {Array(gameAreaController.getPlayerLives(player.id)).fill(<>&#10084;</>)}
+  </Box>
+  };
+
   const listPlayers =
-    status !== 'IN_PROGRESS' ? (
-      <SimpleGrid columns={3} gap={6}>
-        <GridItem colSpan={2} alignContent='center'>
-          <List aria-label='list of players in the game'>
-            <VStack alignItems='stretch'>
-              {players &&
-                players.map((player, index) => (
-                  <ListItem key={index}>
-                    {townController.ourPlayer === player
-                      ? player.userName + ' (you)'
-                      : player
-                      ? player.userName
-                      : ''}
-                    {index === 0 && ' (host)'}
-                  </ListItem>
-                ))}
-            </VStack>
-          </List>
-        </GridItem>
-        <GridItem>
-          <VStack paddingTop='5px'>
-            {joinGameButton}
-            {startGameButton}
-          </VStack>
-        </GridItem>
-      </SimpleGrid>
-    ) : (
-      <List aria-label='list of players in the game'>
-        <VStack alignItems='stretch' borderY={-1}>
-          {players &&
-            players.length > 0 &&
-            players.map((player, index) => <ListItem key={index}>{player.userName}</ListItem>)}
-        </VStack>
-      </List>
-    );
-  console.log('list Players');
+    <Container width='500px'>
+      <VStack alignItems='stretch' borderY='-1'>
+        {status !== 'IN_PROGRESS' ? (<Flex paddingTop='5px'>{joinGameButton}{startGameButton}</Flex>) : <></>}
+        <Center>
+          <HStack>
+          {players && players.map((player, idx) => playerIcon(player, idx))}
+          </HStack>
+        </Center>
+      </VStack>
+    </Container>
 
   return (
     <Container minW='full' paddingX='0px'>
-      <VStack bgColor='white' align='center' paddingBottom='5'>
-        <Divider />
-        {listPlayers}
-        <Divider />
-      </VStack>
+      {listPlayers}
+      <Divider />
       {status === 'IN_PROGRESS' && (
         <Container
           bgColor='salmon'

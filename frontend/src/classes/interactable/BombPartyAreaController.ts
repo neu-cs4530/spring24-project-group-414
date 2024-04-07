@@ -66,10 +66,17 @@ export default class BombPartyAreaController extends GameAreaController<
   }
 
   /**
-   * Returns true if the current player is in the game, false otherwise
+   * Returns true if our player is in the game, false otherwise
    */
   get isPlayer(): boolean {
     return this._model.game?.state.players.includes(this._townController.ourPlayer.id) ?? false;
+  }
+
+  /**
+   * Returns true if our player is the host of the game
+   */
+  get isHost(): boolean {
+    return this.players[0] === this._townController.ourPlayer
   }
 
   /**
