@@ -42,6 +42,8 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
   // The function used to update the game area when the game state changes due to the timer.
   private _areaUpdateFn: (model: GameInstance<BombPartyGameState>) => void;
 
+  private _currentTurnLength: number;
+
   /**
    * Creates a new BombPartyGame.
    */
@@ -68,6 +70,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     });
     this._turnTimer = turnTimer;
     this._dictionary = dictionary;
+    this._currentTurnLength = this.state.settings.turnLength;
     if (priorGame) {
       this._changeSettings(priorGame.state.settings);
     }
@@ -130,8 +133,8 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       },
       points: {
         ...this.state.points,
-        [player.id]: 0
-      }
+        [player.id]: 0,
+      },
     };
     if (this.state.players.length >= this.MIN_PLAYERS) {
       this.state = {
@@ -265,7 +268,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       move.word.includes(this.state.currentSubstring)
     ) {
       this._turnTimer.endTurn();
-      this._increasePoints(move.playerID, move.word)
+      this._increasePoints(move.playerID, move.word);
       move.valid = true;
       this._dictionary.addWordToHistory(move.word);
       let nextPlayerIndex = (this.state.currentPlayerIndex + 1) % this.state.players.length;
@@ -280,7 +283,9 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       };
       // Start the turn timer
       this._turnTimer.startTurn(
-        this.state.settings.turnLength,
+        this.state.settings.decreasingTurnLength
+          ? Math.max(this._currentTurnLength - 5000, 5000)
+          : this.state.settings.turnLength,
         () => this._endPlayerTurnFailure(this.state.currentPlayerIndex),
         () => {
           this.state = {
@@ -290,6 +295,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
           this._areaUpdateFn(this.toModel());
         },
       );
+      this._currentTurnLength -= 5000;
     } else {
       move.valid = false;
       this.state = {
@@ -326,10 +332,10 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
    *
    * @param player - the player who has earned points
    * @param word - the word chosen
-   * @param speed - the amount of time remaining 
+   * @param speed - the amount of time remaining
    */
-  protected _increasePoints(player: PlayerID, word: string, speed: number = 0) {
-    const pointGain = 10 * word.length + speed/this.state.settings.turnLength % 0.1 * 10;
+  protected _increasePoints(player: PlayerID, word: string, speed = 0) {
+    const pointGain = 10 * word.length + ((speed / this.state.settings.turnLength) % 0.1) * 10;
     this.state.points[player] += pointGain;
   }
 
@@ -344,6 +350,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       currentPlayerIndex: Math.floor(Math.random() * this.state.players.length),
       currentSubstring: this._dictionary.generateSubstring(),
     };
+    this._currentTurnLength = this.state.settings.turnLength;
     // Start the turn timer
     this._turnTimer.startTurn(
       this.state.settings.turnLength,
@@ -386,6 +393,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       return;
     }
     this._turnTimer.endTurn();
+    this._currentTurnLength = this.state.settings.turnLength;
     // Find the next alive player
     let nextPlayerIndex = (playerIndex + 1) % this.state.players.length;
     while (this.state.lives[this.state.players[nextPlayerIndex]] <= 0) {
