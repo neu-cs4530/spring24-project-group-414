@@ -140,7 +140,7 @@ export default function GameAreaWrapper(): JSX.Element {
   const gameArea = useInteractable<GameAreaInteractable>('gameArea');
 
   const townController = useTownController();
-  let modalSize = 'xl';
+  const modalSize = '3xl';
   const closeModal = useCallback(() => {
     if (gameArea) {
       townController.interactEnd(gameArea);
@@ -152,18 +152,18 @@ export default function GameAreaWrapper(): JSX.Element {
     townController.unPause();
   }
 
-  if (gameArea) {
-    // TODO: this is repeated code from .useInteractableAreaController(), is this required?
-    const gameAreaController = townController.gameAreas.find(
-      eachArea => eachArea.id == gameArea?.id,
-    );
-    const areaType = gameAreaController?.toInteractableAreaModel().type;
-    console.log(`checking: ${areaType}`);
-    if (areaType === 'BombPartyArea') {
-      modalSize = '3xl';
-      console.log('aosdijoiwer');
-    }
-  }
+  // if (gameArea) {
+  //   // TODO: this is repeated code from .useInteractableAreaController(), is this required?
+  //   const gameAreaController = townController.gameAreas.find(
+  //     eachArea => eachArea.id == gameArea?.id,
+  //   );
+  //   const areaType = gameAreaController?.toInteractableAreaModel().type;
+  //   console.log(`checking: ${areaType}`);
+  //   if (areaType === 'BombPartyArea') {
+  //     modalSize = '3xl';
+  //     console.log('aosdijoiwer');
+  //   }
+  // }
   if (gameArea) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size={modalSize}>
