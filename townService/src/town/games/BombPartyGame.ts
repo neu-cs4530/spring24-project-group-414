@@ -54,8 +54,9 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     super({
       moves: [],
       status: 'WAITING_FOR_PLAYERS',
-      lives: {},
       players: [],
+      lives: {},
+      points: {},
       currentPlayerIndex: 0,
       currentSubstring: '',
       currentTimeLeft: 10,
@@ -123,6 +124,14 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this.state = {
       ...this.state,
       players: [...this.state.players, player.id],
+      lives: {
+        ...this.state.lives,
+        [player.id]: this.state.settings.maxLives,
+      },
+      points: {
+        ...this.state.points,
+        [player.id]: 0
+      }
     };
     if (this.state.players.length >= this.MIN_PLAYERS) {
       this.state = {
@@ -256,6 +265,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       move.word.includes(this.state.currentSubstring)
     ) {
       this._turnTimer.endTurn();
+      this._increasePoints(move.playerID, move.word)
       move.valid = true;
       this._dictionary.addWordToHistory(move.word);
       let nextPlayerIndex = (this.state.currentPlayerIndex + 1) % this.state.players.length;
@@ -312,22 +322,23 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
   }
 
   /**
+   * Increment points for a player who has found a successful word
+   *
+   * @param player - the player who has earned points
+   * @param word - the word chosen
+   * @param speed - the amount of time remaining 
+   */
+  protected _increasePoints(player: PlayerID, word: string, speed: number = 0) {
+    const pointGain = 10 * word.length + speed/this.state.settings.turnLength % 0.1 * 10;
+    this.state.points[player] += pointGain;
+  }
+
+  /**
    * Initializes the game state variables.
    *
    * Sets all players to have the maximum number of lives.
    */
   protected _iniializeGame(): void {
-    // Initialize lives for all players
-    this.state.players.forEach(player => {
-      this.state = {
-        ...this.state,
-        lives: {
-          ...this.state.lives,
-          [player]: this.state.settings.maxLives,
-        },
-      };
-    });
-    // Randomly select the first player
     this.state = {
       ...this.state,
       currentPlayerIndex: Math.floor(Math.random() * this.state.players.length),

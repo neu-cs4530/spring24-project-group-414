@@ -166,6 +166,14 @@ export default class BombPartyAreaController extends GameAreaController<
   }
 
   /**
+   * Returns the number of points for a given player
+   */
+  public getPlayerPoints(playerID: PlayerID): number {
+    // console.log(this._model.game?.state.points[playerID]);
+    return this._model.game?.state.points[playerID] ?? 0;
+  }
+
+  /**
    * Updates the internal state of this BombPartyAreaController based on the new model.
    *
    * Calls super._updateFrom, which updates the occupants of this game area and other
@@ -223,5 +231,16 @@ export default class BombPartyAreaController extends GameAreaController<
       move,
     });
     this.emit('gameUpdated');
+  }
+  
+  /** 
+   * Sends the current text on the text that the current player is typing to the server
+   */
+  public async sendInProgressText(text:string): Promise<void> {
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    throw new Error("not implemented")
   }
 }

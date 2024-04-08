@@ -158,6 +158,8 @@ export interface BombPartyGameState extends WinnableGameState {
   currentPlayerIndex: number;
   // The number of lives remaning for each seat
   lives: { [player: PlayerID]: number };
+  //the number of points a player has scored on successful turns
+  points: { [player: PlayerID]: number };
   // The current substring that players are trying to complete
   currentSubstring: string;
   // the current time remaining in the player's turn (milliseconds) 
@@ -270,7 +272,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BombPartyMove> | StartGameCommand | LeaveGameCommand | GameSettingsCommand<BombPartySettings>;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BombPartyMove> | StartGameCommand | LeaveGameCommand | GameSettingsCommand<BombPartySettings> ;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;

@@ -2,7 +2,6 @@ import { Center, chakra, Container, Input, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
 import { InteractableID } from '../../../../types/CoveyTownSocket';
-import { TextBox } from './Components/TextBox';
 import CSS from 'csstype';
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
@@ -52,6 +51,8 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
       } catch ({ name, message }) {
         return message;
       }
+    } else {
+      
     }
   };
 

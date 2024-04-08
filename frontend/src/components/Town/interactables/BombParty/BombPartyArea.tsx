@@ -134,11 +134,11 @@ export default function BombPartyArea({
     ) : (
       <></>
     );
-  console.log('start game');
 
   const playerIcon = (player: PlayerController, idx: number) => {
     const lives = gameAreaController.getPlayerLives(player.id);
     const maxlives = gameAreaController.settings.maxLives;
+    const points = gameAreaController.getPlayerPoints(player.id);
     return <Box 
       minW='50px'
       border='solid' 
@@ -150,11 +150,13 @@ export default function BombPartyArea({
       {player.userName}{idx === 0 && ' (host)'}
       <Divider />
       {Array(lives).fill(<>&#10084;</>)}{Array(maxlives-lives).fill(<>&#9760;</>)}
+      <Divider />
+      &#11088; {points}
     </Box>
   };
 
   const listPlayers =
-    <Container width='500px'>
+    <Container width='500px' paddingY='10px'>
       <VStack alignItems='stretch' borderY='-1'>
         {status !== 'IN_PROGRESS' ? (<Flex paddingTop='5px'>{joinGameButton}{startGameButton}</Flex>) : <></>}
         <Center>
@@ -170,7 +172,7 @@ export default function BombPartyArea({
       {listPlayers}
       <Divider />
       {status === 'IN_PROGRESS' && (
-        <Container>
+        <Container marginY='10px'>
           <BombPartyBoard gameAreaController={gameAreaController} />
         </Container>
       )}
