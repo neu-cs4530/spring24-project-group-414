@@ -371,6 +371,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
         status: 'OVER',
         winner: this.state.players.filter(p => this.state.lives[p] > 0)[0],
       };
+      this._areaUpdateFn(this.toModel());
       return;
     }
     this._turnTimer.endTurn();

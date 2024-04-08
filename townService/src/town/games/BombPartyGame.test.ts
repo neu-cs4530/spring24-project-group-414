@@ -12,7 +12,7 @@ import BombPartyDictionary from './BombPartyDictionary';
 import BombPartyGame from './BombPartyGame';
 import BombPartyTimer from './BombPartyTimer';
 
-describe('BombPartGame', () => {
+describe('BombPartyGame', () => {
   jest.useFakeTimers();
   let game: BombPartyGame;
   let timer: BombPartyTimer;
