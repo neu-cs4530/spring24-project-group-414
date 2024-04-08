@@ -1,7 +1,6 @@
-import { Center, Box, chakra, Image, Container, Input, VStack } from '@chakra-ui/react';
+import { Center, chakra, Image, Container, Input, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
-import { InteractableID } from '../../../../types/CoveyTownSocket';
 import CSS from 'csstype';
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
@@ -9,13 +8,13 @@ export type BombPartyGameProps = {
 
 const StyledBombPartyBoard = chakra(Container, {
   baseStyle: {
-    width:'500px',
-    height:'400px',
-    minW:'full',
-    border:'solid',
-    borderWidth:'5px',
-    borderRadius:'5px',
-  }
+    width: '500px',
+    height: '400px',
+    minW: 'full',
+    border: 'solid',
+    borderWidth: '5px',
+    borderRadius: '5px',
+  },
 });
 
 export default function BombPartyBoard({ gameAreaController }: BombPartyGameProps): JSX.Element {
@@ -52,7 +51,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
         return message;
       }
     } else {
-      
+      // Add code
     }
   };
 
@@ -71,9 +70,16 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
       <Center>
         <VStack>
           <h1>{whoseTurnText}&apos;s turn</h1>
-          <p><span style={promptStyles}>{currentPromptText}</span></p>
-          <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} isDisabled={!gameAreaController.isOurTurn} />
-          <Image padding='20px' boxSize='120px' src="/assets/bomb2.gif" />
+          <p>
+            <span style={promptStyles}>{currentPromptText}</span>
+          </p>
+          <Input
+            value={inputText}
+            onChange={handleChange}
+            onKeyPress={handleKeyPress}
+            isDisabled={!gameAreaController.isOurTurn}
+          />
+          <Image padding='20px' boxSize='120px' src='/assets/bomb2.gif' />
         </VStack>
       </Center>
     </StyledBombPartyBoard>

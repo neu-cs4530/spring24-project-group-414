@@ -77,7 +77,7 @@ export default class BombPartyAreaController extends GameAreaController<
    * Returns true if our player is the host of the game
    */
   get isHost(): boolean {
-    return this.players[0] === this._townController.ourPlayer
+    return this.players[0] === this._townController.ourPlayer;
   }
 
   /**
@@ -103,16 +103,16 @@ export default class BombPartyAreaController extends GameAreaController<
     }
     return status;
   }
+
   /**
-   * returns the settings data 
+   * returns the settings data
    */
   get settings(): BombPartySettings {
     if (!this._model.game) {
-      throw new Error(NO_GAME_IN_PROGRESS_ERROR)
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
     }
-    return this._model.game?.state.settings
+    return this._model.game?.state.settings;
   }
-
 
   /**
    * Returns the player whose turn it is, if the game is in progress
@@ -232,15 +232,15 @@ export default class BombPartyAreaController extends GameAreaController<
     });
     this.emit('gameUpdated');
   }
-  
-  /** 
+
+  /**
    * Sends the current text on the text that the current player is typing to the server
    */
-  public async sendInProgressText(text:string): Promise<void> {
+  public async sendInProgressText(text: string): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
     }
-    throw new Error("not implemented")
+    throw new Error('not implemented');
   }
 }

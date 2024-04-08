@@ -4,19 +4,14 @@ import {
   Button,
   Container,
   Divider,
-  GridItem,
-  List,
-  ListItem,
-  SimpleGrid,
   useToast,
   VStack,
-  WrapItem,
   HStack,
   Center,
 } from '@chakra-ui/react';
-import {  useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
-import {  useInteractableAreaController } from '../../../../classes/TownController';
+import { useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import { InteractableID, GameResult, GameStatus } from '../../../../types/CoveyTownSocket';
 import BombPartyBoard from './BombPartyBoard';
@@ -129,7 +124,7 @@ export default function BombPartyArea({
         }}
         disabled={isStarting || !gameAreaController.isHost}
         isLoading={isStarting}>
-        { gameAreaController.isHost ? 'Start Game' : 'Waiting for host to start...' }
+        {gameAreaController.isHost ? 'Start Game' : 'Waiting for host to start...'}
       </Button>
     ) : (
       <></>
@@ -139,33 +134,43 @@ export default function BombPartyArea({
     const lives = gameAreaController.getPlayerLives(player.id);
     const maxlives = gameAreaController.settings.maxLives;
     const points = gameAreaController.getPlayerPoints(player.id);
-    return <Box 
-      minW='50px'
-      border='solid' 
-      borderRadius='md'
-      borderColor={townController.ourPlayer === player ? 'blueviolet' : 'white'}
-      backgroundColor='black'
-      padding='4px'
-      key={idx} >
-      {player.userName}{idx === 0 && ' (host)'}
-      <Divider />
-      {Array(lives).fill(<>&#10084;</>)}{Array(maxlives-lives).fill(<>&#9760;</>)}
-      <Divider />
-      &#11088; {points}
-    </Box>
+    return (
+      <Box
+        minW='50px'
+        border='solid'
+        borderRadius='md'
+        borderColor={townController.ourPlayer === player ? 'blueviolet' : 'white'}
+        backgroundColor='black'
+        padding='4px'
+        key={idx}>
+        {player.userName}
+        {idx === 0 && ' (host)'}
+        <Divider />
+        {Array(lives).fill(<>&#10084;</>)}
+        {Array(maxlives - lives).fill(<>&#9760;</>)}
+        <Divider />
+        &#11088; {points}
+      </Box>
+    );
   };
 
-  const listPlayers =
+  const listPlayers = (
     <Container width='500px' paddingY='10px'>
       <VStack alignItems='stretch' borderY='-1'>
-        {status !== 'IN_PROGRESS' ? (<Flex paddingTop='5px'>{joinGameButton}{startGameButton}</Flex>) : <></>}
+        {status !== 'IN_PROGRESS' ? (
+          <Flex paddingTop='5px'>
+            {joinGameButton}
+            {startGameButton}
+          </Flex>
+        ) : (
+          <></>
+        )}
         <Center>
-          <HStack>
-          {players && players.map((player, idx) => playerIcon(player, idx))}
-          </HStack>
+          <HStack>{players && players.map((player, idx) => playerIcon(player, idx))}</HStack>
         </Center>
       </VStack>
     </Container>
+  );
 
   return (
     <Container minW='full' paddingX='0px'>
