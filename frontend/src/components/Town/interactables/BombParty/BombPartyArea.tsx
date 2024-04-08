@@ -4,13 +4,8 @@ import {
   Button,
   Container,
   Divider,
-  GridItem,
-  List,
-  ListItem,
-  SimpleGrid,
   useToast,
   VStack,
-  WrapItem,
   HStack,
   Center,
 } from '@chakra-ui/react';
@@ -139,7 +134,10 @@ export default function BombPartyArea({
     const lives = gameAreaController.getPlayerLives(player.id);
     const maxlives = gameAreaController.settings.maxLives;
     const points = gameAreaController.getPlayerPoints(player.id);
+<<<<<<< HEAD
     console.log(player.id);
+=======
+>>>>>>> 4b0daa539b9b1ab62e7c3825e22b1c8899bcc8d5
     return (
       <Box
         minW='50px'
