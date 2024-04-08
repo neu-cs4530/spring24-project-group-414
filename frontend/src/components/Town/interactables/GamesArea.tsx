@@ -107,29 +107,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
             <TicTacToeArea interactableID={interactableID} />
           ) : gameAreaController.toInteractableAreaModel().type === 'BombPartyArea' ? (
             //TODO: move onGameEnd
-            <BombPartyArea
-              interactableID={interactableID}
-              onGameEnd={() => {
-                if (gameAreaController instanceof BombPartyAreaController) {
-                  const winner = gameAreaController.winner;
-                  if (!winner) {
-                    // nothing
-                  } else if (winner === townController.ourPlayer) {
-                    toast({
-                      title: 'Game over',
-                      description: 'You won!',
-                      status: 'success',
-                    });
-                  } else {
-                    toast({
-                      title: 'Game over',
-                      description: winner + ` is the winner`,
-                      status: 'error',
-                    });
-                  }
-                }
-              }}
-            />
+            <BombPartyArea interactableID={interactableID}/>
           ) : (
             <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
           )}

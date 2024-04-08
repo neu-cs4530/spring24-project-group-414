@@ -1,6 +1,7 @@
 import {
   BombPartyGameState,
   BombPartyMove,
+  BombPartySettings,
   GameArea,
   GameStatus,
   PlayerID,
@@ -102,6 +103,16 @@ export default class BombPartyAreaController extends GameAreaController<
     }
     return status;
   }
+  /**
+   * returns the settings data 
+   */
+  get settings(): BombPartySettings {
+    if (!this._model.game) {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR)
+    }
+    return this._model.game?.state.settings
+  }
+
 
   /**
    * Returns the player whose turn it is, if the game is in progress

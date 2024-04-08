@@ -1,4 +1,4 @@
-import { chakra, Container, Input, VStack } from '@chakra-ui/react';
+import { Center, chakra, Container, Input, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
 import { InteractableID } from '../../../../types/CoveyTownSocket';
@@ -8,8 +8,16 @@ export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
 };
 
-//TODO: add style
-const StyledBombPartyBoard = chakra(Container, {});
+const StyledBombPartyBoard = chakra(Container, {
+  baseStyle: {
+    width:'500px',
+    height:'400px',
+    minW:'full',
+    border:'solid',
+    borderWidth:'5px',
+    borderRadius:'5px',
+  }
+});
 
 export default function BombPartyBoard({ gameAreaController }: BombPartyGameProps): JSX.Element {
   const [whoseTurnText, setWhoseTurnText] = useState(gameAreaController.whoseTurn?.userName);
@@ -48,23 +56,24 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
   };
 
   const promptStyles: CSS.Properties = {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     position: 'static',
     right: 0,
     bottom: '2px',
     padding: '2px',
     fontFamily: 'sans-serif',
-    fontSize: '24px',
+    fontSize: '36px',
     textAlign: 'center',
   };
 
   return (
-    <StyledBombPartyBoard>
-      <h1>{whoseTurnText}&apos;s turn</h1>
-      <b>
-        <p style={promptStyles}>{'prompt:  ' + currentPromptText}</p>
-      </b>
-      <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} />
+    <StyledBombPartyBoard borderColor={gameAreaController.isOurTurn ? '' : 'white'}>
+      <Center>
+        <VStack>
+          <h1>{whoseTurnText}&apos;s turn</h1>
+            <p><span style={promptStyles}>{currentPromptText}</span></p>
+          <Input value={inputText} onChange={handleChange} onKeyPress={handleKeyPress} isDisabled={!gameAreaController.isOurTurn} />
+        </VStack>
+      </Center>
     </StyledBombPartyBoard>
   );
 }

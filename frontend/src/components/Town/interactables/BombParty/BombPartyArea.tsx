@@ -137,18 +137,20 @@ export default function BombPartyArea({
   console.log('start game');
 
   const playerIcon = (player: PlayerController, idx: number) => {
-  return <Box 
-    minW='50px'
-    border='solid' 
-    borderWidth='thin'
-    borderRadius='md'
-    borderColor={townController.ourPlayer === player ? 'blueviolet' : 'white'}
-    padding='4px'
-    key={idx} >
-    {player.userName}{gameAreaController.isHost && ' (host)'}
-    <Divider />
-    {Array(gameAreaController.getPlayerLives(player.id)).fill(<>&#10084;</>)}
-  </Box>
+    const lives = gameAreaController.getPlayerLives(player.id);
+    const maxlives = gameAreaController.settings.maxLives;
+    return <Box 
+      minW='50px'
+      border='solid' 
+      borderRadius='md'
+      borderColor={townController.ourPlayer === player ? 'blueviolet' : 'white'}
+      backgroundColor='black'
+      padding='4px'
+      key={idx} >
+      {player.userName}{idx === 0 && ' (host)'}
+      <Divider />
+      {Array(lives).fill(<>&#10084;</>)}{Array(maxlives-lives).fill(<>&#9760;</>)}
+    </Box>
   };
 
   const listPlayers =
@@ -168,15 +170,7 @@ export default function BombPartyArea({
       {listPlayers}
       <Divider />
       {status === 'IN_PROGRESS' && (
-        <Container
-          bgColor='salmon'
-          width='500px'
-          height='400px'
-          minW='full'
-          border='solid'
-          borderWidth='5px'
-          borderRadius='5px'
-          borderColor='black'>
+        <Container>
           <BombPartyBoard gameAreaController={gameAreaController} />
         </Container>
       )}
