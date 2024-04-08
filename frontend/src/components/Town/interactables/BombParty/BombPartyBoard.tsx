@@ -51,11 +51,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
         return message;
       }
     } else {
-<<<<<<< HEAD
-      /* empty */
-=======
       // Add code
->>>>>>> 4b0daa539b9b1ab62e7c3825e22b1c8899bcc8d5
     }
   };
 
