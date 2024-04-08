@@ -1,7 +1,6 @@
 import { Center, chakra, Image, Container, Input, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
-import CSS from 'csstype';
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
 };
@@ -55,7 +54,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
     }
   };
 
-  const promptStyles: CSS.Properties = {
+  const promptStyles: React.CSSProperties = {
     position: 'static',
     right: 0,
     bottom: '2px',
