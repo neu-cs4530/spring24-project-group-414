@@ -101,7 +101,9 @@ export default function BombPartyArea({
         isLoading={isJoining}>
         Join New Game
       </Button>
-    ): <></>;
+    ) : (
+      <></>
+    );
 
   const startGameButton =
     inGame && status === 'WAITING_TO_START' ? (

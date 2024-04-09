@@ -158,7 +158,7 @@ export interface BombPartyGameState extends WinnableGameState {
   currentPlayerIndex: number;
   // The number of lives remaning for each seat
   lives: { [player: PlayerID]: number };
-  //the number of points a player has scored on successful turns
+  // the number of points a player has scored on successful turns
   points: { [player: PlayerID]: number };
   // The current substring that players are trying to complete
   currentSubstring: string;

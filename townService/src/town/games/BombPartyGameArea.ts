@@ -36,13 +36,15 @@ export default class BombPartyGameArea extends GameArea<BombPartyGame> {
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
         const { players } = updatedState.state;
+        const scores: { [playerName: string]: number } = {};
         players.forEach(player => {
-          this._history.push({
-            gameID,
-            scores: {
-              [player]: updatedState.state.winner === player ? 1 : 0,
-            },
-          });
+          const name =
+            this._occupants.find(eachPlayer => eachPlayer.id === player)?.userName || player;
+          scores[name] = updatedState.state.winner === player ? 1 : 0;
+        });
+        this._history.push({
+          gameID,
+          scores,
         });
       }
     }
@@ -112,13 +114,16 @@ export default class BombPartyGameArea extends GameArea<BombPartyGame> {
         move,
       });
       this._stateUpdated(game.toModel());
-      return {move} as InteractableCommandReturnType<CommandType>;
+      return { move } as InteractableCommandReturnType<CommandType>;
     }
     if (command.type === 'JoinGame') {
       let game = this._game;
       if (!game || game.state.status === 'OVER') {
-        game = new BombPartyGame(new BombPartyTimer(), new BombPartyDictionary(), state =>
-          this._stateUpdated(state),
+        game = new BombPartyGame(
+          new BombPartyTimer(),
+          new BombPartyDictionary(),
+          state => this._stateUpdated(state),
+          this._game,
         );
         this._game = game;
       }

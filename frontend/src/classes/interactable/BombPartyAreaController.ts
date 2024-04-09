@@ -229,7 +229,7 @@ export default class BombPartyAreaController extends GameAreaController<
     await this._townController.sendInteractableCommand(this.id, {
       gameID: instanceID,
       type: 'GameMove',
-      move
+      move,
     });
     // console.log(`controller ${recvMove.word}`)
     // this.emit('moveAttempt', recvMove as BombPartyMove);
@@ -239,7 +239,7 @@ export default class BombPartyAreaController extends GameAreaController<
   /**
    * Sends the current text on the text that the current player is typing to the server
    */
-  public async sendInProgressText(text: string): Promise<void> {
+  public async sendInProgressText(): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);

@@ -55,10 +55,10 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
         console.log(`entered: ${inputText}`);
         return '';
       } catch ({ name, message }) {
-        console.log(message)
+        console.log(message);
         return message;
       }
-    } 
+    }
   };
 
   const promptStyles: React.CSSProperties = {
