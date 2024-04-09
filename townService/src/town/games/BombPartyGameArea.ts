@@ -49,6 +49,10 @@ export default class BombPartyGameArea extends GameArea<BombPartyGame> {
     this._emitAreaChanged();
   }
 
+  // private _moveAttempted(move: BombPartyMove) {
+  //   undefined
+  // }
+
   /**
    * Handle a command from a player in this game area.
    * Supported commands:
@@ -108,7 +112,7 @@ export default class BombPartyGameArea extends GameArea<BombPartyGame> {
         move,
       });
       this._stateUpdated(game.toModel());
-      return undefined as InteractableCommandReturnType<CommandType>;
+      return {move} as InteractableCommandReturnType<CommandType>;
     }
     if (command.type === 'JoinGame') {
       let game = this._game;

@@ -15,6 +15,7 @@ import GameAreaController, {
 } from './GameAreaController';
 
 export type BombPartyEvents = GameEventTypes & {
+  moveAttempt: (move: BombPartyMove) => void;
   turnChanged: (isOurTurn: boolean) => void;
   timerChanged: (secondsLeft: number) => void;
 };
@@ -169,7 +170,6 @@ export default class BombPartyAreaController extends GameAreaController<
    * Returns the number of points for a given player
    */
   public getPlayerPoints(playerID: PlayerID): number {
-    // console.log(this._model.game?.state.points[playerID]);
     return this._model.game?.state.points[playerID] ?? 0;
   }
 
@@ -225,11 +225,13 @@ export default class BombPartyAreaController extends GameAreaController<
       playerID: this._townController.ourPlayer.id,
       word,
     };
-    await this._townController.sendInteractableCommand(this.id, {
+    const { recvMove } = await this._townController.sendInteractableCommand(this.id, {
       gameID: instanceID,
       type: 'GameMove',
-      move,
+      move
     });
+    console.log(`controller ${recvMove.word}`)
+    this.emit('moveAttempt', recvMove as BombPartyMove);
     this.emit('gameUpdated');
   }
 

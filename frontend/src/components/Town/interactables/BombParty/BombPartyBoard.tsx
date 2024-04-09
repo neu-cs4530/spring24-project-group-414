@@ -1,6 +1,7 @@
 import { Center, chakra, Image, Container, Input, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
+import { BombPartyMove } from '../../../../types/CoveyTownSocket';
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
 };
@@ -16,9 +17,12 @@ const StyledBombPartyBoard = chakra(Container, {
   },
 });
 
+// type PlayerColors = 'orange' | 'lightblue' | 'green' | 'purple' | 'yellow'
+
 export default function BombPartyBoard({ gameAreaController }: BombPartyGameProps): JSX.Element {
   const [whoseTurnText, setWhoseTurnText] = useState(gameAreaController.whoseTurn?.userName);
   const [currentPromptText, setCurrentPromptText] = useState(gameAreaController.currentPrompt);
+  const [attemptText, setAttemptText] = useState('');
   const [inputText, setinputText] = useState('');
 
   useEffect(() => {
@@ -26,12 +30,16 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
       setWhoseTurnText(gameAreaController.whoseTurn?.userName);
       setCurrentPromptText(gameAreaController.currentPrompt);
     };
+    const displayAttemptText = (move: BombPartyMove) => {
+      setAttemptText(move.word);
+    };
     gameAreaController.addListener('stateUpdated', updateBoardState);
     gameAreaController.addListener('turnChanged', updateBoardState);
-    // TODO: Listen on more events?
+    // gameAreaController.addListener('moveAttempt', (move: BombPartyMove) => console.log(`move attempt: ${move}`));
     return () => {
       gameAreaController.removeListener('stateUpdated', updateBoardState);
       gameAreaController.removeListener('turnChanged', updateBoardState);
+      // gameAreaController.removeListener('moveAttempt', displayAttemptText);
     };
   }, [gameAreaController]);
 
@@ -49,9 +57,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
       } catch ({ name, message }) {
         return message;
       }
-    } else {
-      // Add code
-    }
+    } 
   };
 
   const promptStyles: React.CSSProperties = {
@@ -78,7 +84,9 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
             onKeyPress={handleKeyPress}
             isDisabled={!gameAreaController.isOurTurn}
           />
+          <p>{attemptText}</p>
           <Image padding='20px' boxSize='120px' src='/assets/bomb2.gif' />
+          <p>{gameAreaController.currentTimeLeft / 1000}s</p>
         </VStack>
       </Center>
     </StyledBombPartyBoard>

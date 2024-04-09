@@ -299,9 +299,10 @@ export interface GameSettingsCommand<SettingsType> {
   settings: SettingsType;
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
-  CommandType extends JoinGameCommand ? { gameID: string}:
+  CommandType extends JoinGameCommand ? {gameID: string}:
   CommandType extends ViewingAreaUpdateCommand ? undefined :
   CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
+  CommandType extends GameMoveCommand<BombPartyMove> ? {move: BombPartyMove} :
   CommandType extends LeaveGameCommand ? undefined :
   never;
 

@@ -61,7 +61,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
       points: {},
       currentPlayerIndex: 0,
       currentSubstring: '',
-      currentTimeLeft: 10,
+      currentTimeLeft: 0,
       settings: {
         maxLives: 3,
         turnLength: 25000,
