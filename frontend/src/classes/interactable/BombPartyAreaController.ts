@@ -225,13 +225,14 @@ export default class BombPartyAreaController extends GameAreaController<
       playerID: this._townController.ourPlayer.id,
       word,
     };
-    const { recvMove } = await this._townController.sendInteractableCommand(this.id, {
+    // const {recvMove} =
+    await this._townController.sendInteractableCommand(this.id, {
       gameID: instanceID,
       type: 'GameMove',
       move
     });
-    console.log(`controller ${recvMove.word}`)
-    this.emit('moveAttempt', recvMove as BombPartyMove);
+    // console.log(`controller ${recvMove.word}`)
+    // this.emit('moveAttempt', recvMove as BombPartyMove);
     this.emit('gameUpdated');
   }
 

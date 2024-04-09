@@ -50,11 +50,12 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
   const handleKeyPress = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       try {
+        setinputText('');
         await gameAreaController.makeMove(inputText);
         console.log(`entered: ${inputText}`);
-        setinputText('');
         return '';
       } catch ({ name, message }) {
+        console.log(message)
         return message;
       }
     } 
@@ -71,7 +72,7 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
   };
 
   return (
-    <StyledBombPartyBoard borderColor={gameAreaController.isOurTurn ? '' : 'white'}>
+    <StyledBombPartyBoard borderColor={gameAreaController.isOurTurn ? 'black' : 'white'}>
       <Center>
         <VStack>
           <h1>{whoseTurnText}&apos;s turn</h1>
@@ -83,10 +84,11 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
             onChange={handleChange}
             onKeyPress={handleKeyPress}
             isDisabled={!gameAreaController.isOurTurn}
+            textColor='black'
           />
           <p>{attemptText}</p>
           <Image padding='20px' boxSize='120px' src='/assets/bomb2.gif' />
-          <p>{gameAreaController.currentTimeLeft / 1000}s</p>
+          <p>{(gameAreaController.currentTimeLeft ?? 0) / 1000}s</p>
         </VStack>
       </Center>
     </StyledBombPartyBoard>

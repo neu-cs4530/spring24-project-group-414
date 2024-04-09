@@ -81,9 +81,7 @@ export default function BombPartyArea({
   }, [gameAreaController, townController, toast]);
 
   const joinGameButton =
-    status === 'IN_PROGRESS' || gameAreaController.isPlayer ? (
-      <></>
-    ) : (
+    status === 'WAITING_FOR_PLAYERS' || status === 'OVER' || !gameAreaController.isPlayer ? (
       <Button
         flex='1'
         onClick={async () => {
@@ -103,7 +101,7 @@ export default function BombPartyArea({
         isLoading={isJoining}>
         Join New Game
       </Button>
-    );
+    ): <></>;
 
   const startGameButton =
     inGame && status === 'WAITING_TO_START' ? (
@@ -140,7 +138,7 @@ export default function BombPartyArea({
         border='solid'
         borderRadius='md'
         borderColor={townController.ourPlayer === player ? 'blueviolet' : 'white'}
-        backgroundColor='black'
+        backgroundColor='whitesmoke'
         padding='4px'
         key={idx}>
         {player.userName}
