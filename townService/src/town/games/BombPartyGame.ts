@@ -28,10 +28,10 @@ import Game from './Game';
  */
 export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMove> {
   // The maximum number of players that can join the game.
-  MAX_PLAYERS = 8;
+  static readonly MAX_PLAYERS = 8;
 
   // The minimum number of players required to start the game.
-  MIN_PLAYERS = 2;
+  static readonly MIN_PLAYERS = 2;
 
   // The timer used to keep track of the time remaining for each player's turn, and ends the turn if the time runs out.
   private _turnTimer: BombPartyTimer;
@@ -42,6 +42,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
   // The function used to update the game area when the game state changes due to the timer.
   private _areaUpdateFn: (model: GameInstance<BombPartyGameState>) => void;
 
+  // The max turn length of the current turn. Used for decreasing turn length with consecutive successful turns.
   private _currentTurnLength: number;
 
   /**
@@ -121,7 +122,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     if (this.state.players.some(p => p === player.id)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    if (this.state.players.length >= this.MAX_PLAYERS) {
+    if (this.state.players.length >= BombPartyGame.MAX_PLAYERS) {
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
     this.state = {
@@ -136,7 +137,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
         [player.id]: 0,
       },
     };
-    if (this.state.players.length >= this.MIN_PLAYERS) {
+    if (this.state.players.length >= BombPartyGame.MIN_PLAYERS) {
       this.state = {
         ...this.state,
         status: 'WAITING_TO_START',
@@ -171,7 +172,7 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
           ...this.state,
           players: this.state.players.filter(p => p !== player.id),
           status:
-            this.state.players.filter(p => p !== player.id).length >= this.MIN_PLAYERS
+            this.state.players.filter(p => p !== player.id).length >= BombPartyGame.MIN_PLAYERS
               ? 'WAITING_TO_START'
               : 'WAITING_FOR_PLAYERS',
         };
@@ -222,6 +223,17 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this._applyMove(newMove);
   }
 
+  /**
+   * Applies a change to the game settings.
+   * The host player can change the game settings before the game starts.
+   *
+   * Validates the settings, and if they are valid, applies the settings to the game.
+   * @param settings The settings to apply to the game
+   *
+   * @throws InvalidParametersError if the player is not the host player (PLAYER_NOT_GAME_HOST_MESSAGE)
+   * @throws InvalidParametersError if the game is not in the WAITING_FOR_PLAYERS or WAITING_TO_START state (GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE)
+   * @throws InvalidParametersError if the settings are not valid (GAME_SETTINGS_NOT_VALID_MESSAGE)
+   */
   public changeSettings(settings: GameSettingsChange<BombPartySettings>): void {
     if (settings.playerID !== this.state.players[0]) {
       throw new InvalidParametersError(PLAYER_NOT_GAME_HOST_MESSAGE);
@@ -229,6 +241,16 @@ export default class BombPartyGame extends Game<BombPartyGameState, BombPartyMov
     this._changeSettings(settings.settings);
   }
 
+  /**
+   * Applies a settings change to the game state.
+   * The host player can change the game settings before the game starts.
+   *
+   * Validates the settings, and if they are valid, applies the settings to the game state.
+   * @param settings The settings to apply to the game state
+   *
+   * @throws InvalidParametersError if the game is not in the WAITING_FOR_PLAYERS or WAITING_TO_START state (GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE)
+   * @throws InvalidParametersError if the settings are not valid (GAME_SETTINGS_NOT_VALID_MESSAGE)
+   */
   protected _changeSettings(settings: BombPartySettings): void {
     if (this.state.status !== 'WAITING_FOR_PLAYERS' && this.state.status !== 'WAITING_TO_START') {
       throw new InvalidParametersError(GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE);

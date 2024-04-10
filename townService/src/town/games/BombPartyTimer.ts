@@ -29,23 +29,15 @@ export default class BombPartyTimer {
       this._turnLength = turnLength;
       this._remainingTime = turnLength;
 
-      // this._intervalTimerId = setInterval(() => {
-      //   this._remainingTime -= 1000; // Change from 1 to 1000
-      //   tickCallBack();
-      //   if (this._remainingTime <= 0) {
-      //     endTurnCallBack();
-      //     this.endTurn();
-      //   }
-      // }, 1000);
-
       this._timeoutTimerId = setTimeout(() => {
         this.endTurn();
         endTurnCallBack();
+        tickCallBack();
       }, turnLength);
 
       this._intervalTimerId = setInterval(() => {
-        tickCallBack();
         this._remainingTime -= 1000;
+        tickCallBack();
       }, 1000);
     }
   }

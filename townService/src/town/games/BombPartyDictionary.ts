@@ -6,6 +6,10 @@ type BombPartyWordMap = {
   [key in string]: boolean;
 };
 
+/**
+ * Loads the english dictionary from a designated JSON file.
+ * @returns a hash collection of english words.
+ */
 function loadEnglishDictionaryFromJSON(): BombPartyWordMap {
   const jsonData = fs.readFileSync(
     path.join(path.resolve(), 'src/town/games/data/words_dictionary.json'),
@@ -22,15 +26,11 @@ export default class BombPartyDictionary {
   // The list of words that have already been used in the game.
   private _wordHistory: string[];
 
-  // The list of substrings that have been used in the game.
-  private _substringHistory: string[];
-
   // Hash collection used to lookup valid words
   private _dict: BombPartyWordMap;
 
   constructor(lang = 'en') {
     this._wordHistory = [];
-    this._substringHistory = [];
     if (lang === 'en') {
       this._dict = loadEnglishDictionaryFromJSON();
     } else {
@@ -83,6 +83,5 @@ export default class BombPartyDictionary {
    */
   public clearHistory(): void {
     this._wordHistory = [];
-    this._substringHistory = [];
   }
 }

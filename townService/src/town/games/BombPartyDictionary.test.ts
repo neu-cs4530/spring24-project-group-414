@@ -64,7 +64,7 @@ describe('BombPartyDictionary', () => {
     for (let i = 0; i < 100; i++) {
       const prompt = dictionary.generateSubstring();
       expect(prompt.length === 2 || prompt.length === 3).toBeTruthy();
-      expect(unlikelyPrompts).not.toContain(prompt); // uncertain
+      expect(unlikelyPrompts).not.toContain(prompt);
     }
   });
 });

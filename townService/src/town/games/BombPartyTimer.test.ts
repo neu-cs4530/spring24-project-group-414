@@ -46,6 +46,13 @@ describe('BombPartyTimer', () => {
       jest.advanceTimersByTime(1000);
       expect(endTurnCallback).toHaveBeenCalled();
     });
+    it('should call the tickCallBack every second while the turn is active', () => {
+      timer.startTurn(3000, endTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1000);
+      expect(tickCallback).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(2001);
+      expect(tickCallback).toHaveBeenCalledTimes(3);
+    });
     it('should start after timing out and started again', () => {
       timer.startTurn(1000, endTurnCallback, tickCallback);
       jest.advanceTimersByTime(1001);
@@ -73,6 +80,23 @@ describe('BombPartyTimer', () => {
 
     it('should return 0 if there is no turn in progress', () => {
       expect(timer.turnLength).toBe(0);
+    });
+  });
+
+  describe('remainingTime', () => {
+    it('should return the remaining time in the current turn', () => {
+      timer.startTurn(3000, endTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1000);
+      expect(timer.remainingTime).toBe(2000);
+      jest.advanceTimersByTime(1000);
+      expect(timer.remainingTime).toBe(1000);
+    });
+
+    it('should return 0 if turn has ended or not started', () => {
+      expect(timer.remainingTime).toBe(0);
+      timer.startTurn(1000, endTurnCallback, tickCallback);
+      jest.advanceTimersByTime(1000);
+      expect(timer.remainingTime).toBe(0);
     });
   });
 });
