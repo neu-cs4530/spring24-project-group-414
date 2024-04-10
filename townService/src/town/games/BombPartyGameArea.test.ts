@@ -3,8 +3,10 @@ import { mock } from 'jest-mock-extended';
 import {
   BombPartyGameState,
   BombPartyMove,
+  BombPartySettings,
   GameInstanceID,
   GameMove,
+  GameSettingsChange,
   TownEmitter,
 } from '../../types/CoveyTownSocket';
 import Player from '../../lib/Player';
@@ -38,6 +40,8 @@ class TestingGame extends Game<BombPartyGameState, BombPartyMove> {
   }
 
   public applyMove(move: GameMove<BombPartyMove>): void {}
+
+  public changeSettings(settings: GameSettingsChange<BombPartySettings>): void {}
 
   public endGame(winner?: string) {
     this.state = {
@@ -329,7 +333,111 @@ describe('BombPartyGameArea', () => {
       );
     });
   });
-  test('[T3.5] When given an invalid command it should throw an error', () => {
+  describe('[T3.5] ChangeSettings command', () => {
+    it('should throw an error if there is no game in progress and not call _emitAreaChanged', () => {
+      expect(() =>
+        gameArea.handleCommand(
+          {
+            type: 'GameSettings',
+            gameID: game.id,
+            settings: {
+              maxLives: 5,
+              turnLength: 30000,
+              decreasingTurnLength: false,
+            },
+          },
+          player1,
+        ),
+      ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      expect(interactableUpdateSpy).not.toHaveBeenCalled();
+    });
+    describe('when there is a game in progress', () => {
+      it('should throw an error if the gameID does not match the game and not call _emitAreaChanged', () => {
+        gameArea.handleCommand({ type: 'JoinGame' }, player1);
+        interactableUpdateSpy.mockClear();
+        expect(() =>
+          gameArea.handleCommand(
+            {
+              type: 'GameSettings',
+              gameID: nanoid(),
+              settings: {
+                maxLives: 5,
+                turnLength: 30000,
+                decreasingTurnLength: false,
+              },
+            },
+            player1,
+          ),
+        ).toThrowError(GAME_ID_MISSMATCH_MESSAGE);
+        expect(interactableUpdateSpy).not.toHaveBeenCalled();
+      });
+      it('should call gameSettings on the game and call _emitAreaChanged', () => {
+        const { gameID } = gameArea.handleCommand({ type: 'JoinGame' }, player1);
+        if (!game) {
+          throw new Error('Game was not created by the first call to join');
+        }
+        expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
+        const settingsSpy = jest.spyOn(game, 'changeSettings');
+        gameArea.handleCommand(
+          {
+            type: 'GameSettings',
+            gameID,
+            settings: {
+              maxLives: 5,
+              turnLength: 30000,
+              decreasingTurnLength: false,
+            },
+          },
+          player1,
+        );
+        expect(settingsSpy).toHaveBeenCalledWith({
+          gameID,
+          playerID: player1.id,
+          settings: {
+            maxLives: 5,
+            turnLength: 30000,
+            decreasingTurnLength: false,
+          },
+        });
+        expect(interactableUpdateSpy).toHaveBeenCalledTimes(2);
+      });
+      it('should not call _emitAreaChanged if the game throws an error', () => {
+        gameArea.handleCommand({ type: 'JoinGame' }, player1);
+        if (!game) {
+          throw new Error('Game was not created by the first call to join');
+        }
+        interactableUpdateSpy.mockClear();
+        const settingsSpy = jest.spyOn(game, 'changeSettings').mockImplementationOnce(() => {
+          throw new Error('Test Error');
+        });
+        expect(() =>
+          gameArea.handleCommand(
+            {
+              type: 'GameSettings',
+              gameID: game.id,
+              settings: {
+                maxLives: 5,
+                turnLength: 30000,
+                decreasingTurnLength: false,
+              },
+            },
+            player1,
+          ),
+        ).toThrowError('Test Error');
+        expect(settingsSpy).toHaveBeenCalledWith({
+          gameID: game.id,
+          playerID: player1.id,
+          settings: {
+            maxLives: 5,
+            turnLength: 30000,
+            decreasingTurnLength: false,
+          },
+        });
+        expect(interactableUpdateSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
+  test('[T3.6] When given an invalid command it should throw an error', () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore (Testing an invalid command, only possible at the boundary of the type system)
     expect(() => gameArea.handleCommand({ type: 'InvalidCommand' }, player1)).toThrowError(
