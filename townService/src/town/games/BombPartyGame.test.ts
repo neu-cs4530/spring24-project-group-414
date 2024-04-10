@@ -3,15 +3,72 @@ import {
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
+  GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_GAME_HOST_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
+import Player from '../../lib/Player';
 import BombPartyDictionary from './BombPartyDictionary';
 import BombPartyGame from './BombPartyGame';
 import BombPartyTimer from './BombPartyTimer';
 
+function createMovesFromList(
+  game: BombPartyGame,
+  dictionary: BombPartyDictionary,
+  players: Player[],
+  prompts: string[],
+  words: string[],
+) {
+  let currentPromptIndex = 0;
+  let currentPlayerIndex = 0;
+  let currentWordIndex = 0;
+  const prepareNextPrompt = () => {
+    jest.spyOn(dictionary, 'generateSubstring').mockReturnValue(prompts[currentPromptIndex]);
+    currentPromptIndex++;
+  };
+  const turnTimeOut = () => {
+    jest.advanceTimersByTime(game.state.settings.turnLength + 1);
+  };
+  const submitWord = (player: Player, word: string, firstTurn: boolean) => {
+    if (!firstTurn) {
+      prepareNextPrompt();
+    }
+    game.applyMove({
+      gameID: game.id,
+      playerID: player.id,
+      move: {
+        word,
+        playerID: player.id,
+      },
+    });
+  };
+  const gameOver = () => game.state.status === 'OVER';
+
+  // Join Players to the game and start the game
+  players.forEach((player, index) => {
+    game.join(player);
+  });
+  prepareNextPrompt();
+  jest.spyOn(Math, 'random').mockReturnValue(0);
+  game.startGame(players[0]);
+
+  while (currentWordIndex < words.length && !gameOver()) {
+    const word = words[currentWordIndex];
+    if (word.length === 0) {
+      turnTimeOut();
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    } else {
+      submitWord(players[currentPlayerIndex], word, currentWordIndex === 0);
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    }
+    if (gameOver()) {
+      return;
+    }
+    currentWordIndex++;
+  }
+}
 describe('BombPartyGame', () => {
   jest.useFakeTimers();
   let game: BombPartyGame;
@@ -145,7 +202,6 @@ describe('BombPartyGame', () => {
         expect(game.state.currentPlayerIndex).toBe(0);
         expect(game.state.currentSubstring).toBe('test');
       });
-      // TODO: Expand startGame tests to cover the changes caused by the game starting
     });
   });
   describe('[T1.3] _leave', () => {
@@ -252,6 +308,62 @@ describe('BombPartyGame', () => {
           game.leave(player1);
           expect(game.state.status).toBe('WAITING_FOR_PLAYERS');
         });
+      });
+    });
+  });
+  describe('changeSettings', () => {
+    it('should throw an error if the game is in progress', () => {
+      jest.spyOn(dictionary, 'generateSubstring').mockReturnValue('test');
+      const player1 = createPlayerForTesting();
+      const player2 = createPlayerForTesting();
+      game.join(player1);
+      game.join(player2);
+      game.startGame(player1);
+      expect(() =>
+        game.changeSettings({
+          playerID: player1.id,
+          gameID: game.id,
+          settings: {
+            maxLives: 5,
+            turnLength: 30000,
+            decreasingTurnLength: false,
+          },
+        }),
+      ).toThrowError(GAME_SETTINGS_NOT_MODIFIABLE_MESSAGE);
+    });
+    it('should throw an error if the player is not the game host', () => {
+      const player1 = createPlayerForTesting();
+      const player2 = createPlayerForTesting();
+      game.join(player1);
+      game.join(player2);
+      expect(() =>
+        game.changeSettings({
+          playerID: player2.id,
+          gameID: game.id,
+          settings: {
+            maxLives: 5,
+            turnLength: 30000,
+            decreasingTurnLength: false,
+          },
+        }),
+      ).toThrowError(PLAYER_NOT_GAME_HOST_MESSAGE);
+    });
+    it('should update the game settings if the game is not in progress and the player is the host', () => {
+      const player1 = createPlayerForTesting();
+      game.join(player1);
+      game.changeSettings({
+        playerID: player1.id,
+        gameID: game.id,
+        settings: {
+          maxLives: 5,
+          turnLength: 30000,
+          decreasingTurnLength: false,
+        },
+      });
+      expect(game.state.settings).toEqual({
+        maxLives: 5,
+        turnLength: 30000,
+        decreasingTurnLength: false,
       });
     });
   });
@@ -424,7 +536,22 @@ describe('BombPartyGame', () => {
         expect(game.state.moves).toHaveLength(1);
       });
     });
-    describe('[T2.3] when given an invalid move', () => {
+    describe('test', () => {
+      const newTimer = new BombPartyTimer();
+      const newDictionary = new BombPartyDictionary();
+      const newUpdateCallback = jest.fn();
+      const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+      createMovesFromList(
+        newGame,
+        newDictionary,
+        [player1, player2, player3, player4],
+        ['test', 'test', 'test', 'test'],
+        ['test', '', '', '', 'testing', '', '', '', 'tested', '', '', '', 'detest'],
+      );
+      expect(newGame.state.moves).toHaveLength(3);
+      expect(newGame.state.status).toBe('OVER');
+    });
+    describe('[T2.4] when given an invalid move', () => {
       it('throws an error if the game is not in progress', () => {
         expect(() =>
           game.applyMove({
