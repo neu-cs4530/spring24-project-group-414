@@ -31,7 +31,31 @@ export default function BombPartyArea({
   const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
   const townController = useTownController();
   // states to hold BombPartyAreaValues
-  const [players, setPlayers] = useState<PlayerController[]>(gameAreaController.players);
+  //const [players, setPlayers] = useState<PlayerController[]>(gameAreaController.players);
+  const [player1, setPlayer1] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(0),
+  );
+  const [player2, setPlayer2] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(1),
+  );
+  const [player3, setPlayer3] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(2),
+  );
+  const [player4, setPlayer4] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(3),
+  );
+  const [player5, setPlayer5] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(4),
+  );
+  const [player6, setPlayer6] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(5),
+  );
+  const [player7, setPlayer7] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(6),
+  );
+  const [player8, setPlayer8] = useState<PlayerController | undefined>(
+    gameAreaController.getPlayer(7),
+  );
   const [isJoining, setIsJoining] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [status, setGameStatus] = useState<GameStatus>(gameAreaController.status);
@@ -53,8 +77,16 @@ export default function BombPartyArea({
     }
     //functions to update states
     const updateGameState = () => {
-      setPlayers(gameAreaController.players);
+      // setPlayers(gameAreaController.players);
       setGameStatus(gameAreaController.status || 'WAITING_FOR_PLAYERS');
+      setPlayer1(gameAreaController.getPlayer(0));
+      setPlayer2(gameAreaController.getPlayer(1));
+      setPlayer3(gameAreaController.getPlayer(2));
+      setPlayer4(gameAreaController.getPlayer(3));
+      setPlayer5(gameAreaController.getPlayer(4));
+      setPlayer6(gameAreaController.getPlayer(5));
+      setPlayer7(gameAreaController.getPlayer(6));
+      setPlayer8(gameAreaController.getPlayer(7));
     };
     const onGameEnd = () => {
       const winner = gameAreaController.winner;
@@ -97,9 +129,9 @@ export default function BombPartyArea({
           }
           setIsJoining(false);
         }}
-        disabled={isJoining}
+        disabled={gameAreaController.isPlayer}
         isLoading={isJoining}>
-        Join New Game
+        {gameAreaController.isPlayer ? 'Waiting for more players...' : 'Join New Game'}
       </Button>
     ) : (
       <></>
@@ -166,7 +198,16 @@ export default function BombPartyArea({
           <></>
         )}
         <Center>
-          <HStack>{players && players.map((player, idx) => playerIcon(player, idx))}</HStack>
+          <HStack>
+            {player1 && playerIcon(player1, 0)}
+            {player2 && playerIcon(player2, 1)}
+            {player3 && playerIcon(player3, 2)}
+            {player4 && playerIcon(player4, 3)}
+            {player5 && playerIcon(player5, 4)}
+            {player6 && playerIcon(player6, 5)}
+            {player7 && playerIcon(player7, 6)}
+            {player8 && playerIcon(player8, 7)}
+          </HStack>
         </Center>
       </VStack>
     </Container>

@@ -20,6 +20,7 @@ export type BombPartyEvents = GameEventTypes & {
   timerChanged: (secondsLeft: number) => void;
 };
 
+export type BombPartySeat = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export default class BombPartyAreaController extends GameAreaController<
   BombPartyGameState,
   BombPartyEvents
@@ -36,6 +37,16 @@ export default class BombPartyAreaController extends GameAreaController<
       );
     }
     return [];
+  }
+
+  public getPlayer(seatNumber: BombPartySeat): PlayerController | undefined {
+    if (this._model.game?.state.players.length || 0 > seatNumber) {
+      const player = this._model.game?.state.players[seatNumber];
+      if (player) {
+        return this.occupants.find(eachOccupant => eachOccupant.id === player);
+      }
+    }
+    return undefined;
   }
 
   get playerID(): string {
@@ -78,7 +89,7 @@ export default class BombPartyAreaController extends GameAreaController<
    * Returns true if our player is the host of the game
    */
   get isHost(): boolean {
-    return this.players[0] === this._townController.ourPlayer;
+    return this.getPlayer(0) === this._townController.ourPlayer;
   }
 
   /**
@@ -149,7 +160,7 @@ export default class BombPartyAreaController extends GameAreaController<
    *
    */
   isEmpty(): boolean {
-    return this.players.length === 0 && this.occupants.length === 0;
+    return this.getPlayer(0) !== undefined && this.occupants.length === 0;
   }
 
   /**
