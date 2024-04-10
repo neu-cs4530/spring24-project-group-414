@@ -553,36 +553,187 @@ describe('BombPartyGame', () => {
         expect(game.state.moves).toHaveLength(1);
       });
     });
-    describe('first player wins when the other players give bad answers and timeout', () => {
-      const newTimer = new BombPartyTimer();
-      const newDictionary = new BombPartyDictionary();
-      const newUpdateCallback = jest.fn();
-      const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
-      createMovesFromList(
-        newGame,
-        newDictionary,
-        [player1, player2, player3, player4],
-        ['test', 'test', 'test', 'test'],
-        [
-          'test',
-          'test',
-          'random',
-          '',
-          '',
-          '',
-          'testing',
-          '',
-          '',
-          '',
-          'tested',
-          '',
-          '',
-          '',
-          'detest',
-        ],
-      );
-      expect(newGame.state.moves).toHaveLength(5);
-      expect(newGame.state.status).toBe('OVER');
+    describe('when a timeout ends the game, it ends the game and declares the winner', () => {
+      test('player1 wins', () => {
+        const newTimer = new BombPartyTimer();
+        const newDictionary = new BombPartyDictionary();
+        const newUpdateCallback = jest.fn();
+        const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+        createMovesFromList(
+          newGame,
+          newDictionary,
+          [player1, player2, player3, player4],
+          ['test', 'test', 'test', 'test'],
+          [
+            'test',
+            'test',
+            'random',
+            '',
+            '',
+            '',
+            'testing',
+            '',
+            '',
+            '',
+            'tested',
+            '',
+            '',
+            '',
+            'detest', // game should end before this is submitted
+          ],
+        );
+        expect(newGame.state.moves).toHaveLength(5);
+        expect(newGame.state.status).toBe('OVER');
+        expect(newGame.state.winner).toBe(player1.id);
+      });
+      test('player2 wins', () => {
+        const newTimer = new BombPartyTimer();
+        const newDictionary = new BombPartyDictionary();
+        const newUpdateCallback = jest.fn();
+        const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+        createMovesFromList(
+          newGame,
+          newDictionary,
+          [player1, player2, player3, player4],
+          ['test', 'test', 'test', 'test'],
+          [
+            '', // 1
+            'test', // 2
+            'test', // 3
+            'random',
+            '',
+            '', // 4
+            '', // 1
+            'testing', // 2
+            '', // 3
+            '', // 4
+            '', // 1
+            'tested', // 2
+            '', // 3
+            '', // 4
+            '', // 1
+            'detest', // game should end before this is submitted
+          ],
+        );
+        expect(newGame.state.moves).toHaveLength(5);
+        expect(newGame.state.status).toBe('OVER');
+        expect(newGame.state.winner).toBe(player2.id);
+      });
+      test('player3 wins', () => {
+        const newTimer = new BombPartyTimer();
+        const newDictionary = new BombPartyDictionary();
+        const newUpdateCallback = jest.fn();
+        const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+        createMovesFromList(
+          newGame,
+          newDictionary,
+          [player1, player2, player3, player4],
+          ['test', 'test', 'test', 'test'],
+          [
+            '', // 1
+            '', // 2
+            'test', // 3
+            'test', // 4
+            'random',
+            '',
+            '', // 1
+            '', // 2
+            'testing', // 3
+            '', // 4
+            '', // 1
+            '', // 2
+            'tested', // 3
+            '', // 4
+            '', // 1
+            '', // 2
+            'detest', // game should end before this is submitted
+          ],
+        );
+        expect(newGame.state.moves).toHaveLength(5);
+        expect(newGame.state.status).toBe('OVER');
+        expect(newGame.state.winner).toBe(player3.id);
+      });
+      test('player4 wins', () => {
+        const newTimer = new BombPartyTimer();
+        const newDictionary = new BombPartyDictionary();
+        const newUpdateCallback = jest.fn();
+        const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+        createMovesFromList(
+          newGame,
+          newDictionary,
+          [player1, player2, player3, player4],
+          ['test', 'test', 'test', 'test'],
+          [
+            '',
+            '',
+            '',
+            'test',
+            'test',
+            'random',
+            '',
+            '',
+            '',
+            'testing',
+            '',
+            '',
+            '',
+            'tested', // game should end before this is submitted
+          ],
+        );
+        expect(newGame.state.moves).toHaveLength(4);
+        expect(newGame.state.status).toBe('OVER');
+        expect(newGame.state.winner).toBe(player4.id);
+      });
+      test('close game', () => {
+        const newTimer = new BombPartyTimer();
+        const newDictionary = new BombPartyDictionary();
+        const newUpdateCallback = jest.fn();
+        const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+        createMovesFromList(
+          newGame,
+          newDictionary,
+          [player1, player2, player3, player4],
+          ['test', 'test', 'test', 'test'],
+          ['', '', '', '', '', '', '', '', 'test', '', '', ''],
+        );
+        expect(newGame.state.moves).toHaveLength(1);
+        expect(newGame.state.status).toBe('OVER');
+        expect(newGame.state.winner).toBe(player1.id);
+      });
+    });
+    describe('when a timeout does not end the game, it should not end the game', () => {
+      test('almost timed out', () => {
+        const newTimer = new BombPartyTimer();
+        const newDictionary = new BombPartyDictionary();
+        const newUpdateCallback = jest.fn();
+        const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+        createMovesFromList(
+          newGame,
+          newDictionary,
+          [player1, player2, player3, player4],
+          ['test', 'test', 'test', 'test'],
+          ['', '', '', '', '', '', '', '', '', ''],
+        );
+        expect(newGame.state.moves).toHaveLength(0);
+        expect(newGame.state.status).toBe('IN_PROGRESS');
+        expect(newGame.state.winner).toBeUndefined();
+      });
+      test('two players with no timing out', () => {
+        const newTimer = new BombPartyTimer();
+        const newDictionary = new BombPartyDictionary();
+        const newUpdateCallback = jest.fn();
+        const newGame = new BombPartyGame(newTimer, newDictionary, newUpdateCallback);
+        createMovesFromList(
+          newGame,
+          newDictionary,
+          [player1, player2],
+          ['test', 'test', 'test', 'test'],
+          ['test', 'tested', 'testing', 'detest', 'detested', 'detesting'],
+        );
+        expect(newGame.state.moves).toHaveLength(6);
+        expect(newGame.state.status).toBe('IN_PROGRESS');
+        expect(newGame.state.winner).toBeUndefined();
+      });
     });
     describe('[T2.4] when given an invalid move', () => {
       it('throws an error if the game is not in progress', () => {
