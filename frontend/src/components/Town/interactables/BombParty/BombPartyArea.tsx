@@ -113,7 +113,7 @@ export default function BombPartyArea({
   }, [gameAreaController, townController, toast]);
 
   const joinGameButton =
-    status === 'WAITING_FOR_PLAYERS' || status === 'OVER' || !gameAreaController.isPlayer ? (
+    (status === 'WAITING_FOR_PLAYERS' && !gameAreaController.isPlayer) || status === 'OVER' ? (
       <Button
         flex='1'
         onClick={async () => {
@@ -129,9 +129,11 @@ export default function BombPartyArea({
           }
           setIsJoining(false);
         }}
-        disabled={gameAreaController.isPlayer}
+        disabled={gameAreaController.isPlayer && status === 'WAITING_FOR_PLAYERS'}
         isLoading={isJoining}>
-        {gameAreaController.isPlayer ? 'Waiting for more players...' : 'Join New Game'}
+        {gameAreaController.isPlayer && status === 'WAITING_FOR_PLAYERS'
+          ? 'Waiting for more players...'
+          : 'Join New Game'}
       </Button>
     ) : (
       <></>
