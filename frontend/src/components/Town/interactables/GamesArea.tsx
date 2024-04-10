@@ -63,7 +63,6 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
   }, [townController, gameAreaController]);
-  console.log(gameAreaController.toInteractableAreaModel().type);
   return (
     <>
       <Accordion allowToggle>
