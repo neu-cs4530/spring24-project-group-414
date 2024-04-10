@@ -52,10 +52,8 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
       try {
         setinputText('');
         await gameAreaController.makeMove(inputText);
-        console.log(`entered: ${inputText}`);
         return '';
       } catch ({ name, message }) {
-        console.log(message);
         return message;
       }
     }
