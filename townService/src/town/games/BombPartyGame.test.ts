@@ -14,6 +14,23 @@ import BombPartyDictionary from './BombPartyDictionary';
 import BombPartyGame from './BombPartyGame';
 import BombPartyTimer from './BombPartyTimer';
 
+/**
+ * A helper function for applying a list of moves to a game.
+ * Each of the lists is in order of appearance in the game.
+ *
+ * The first player in the players list will be the first player to take their turn, with the rest following in order.
+ * The first prompt in the prompts list will be the first prompt, with the rest following in order.
+ * The first word in the words list will be the first word submitted, with the rest following in order.
+ *
+ * If a word is bad, it will not progress to the next player's turn or change the prompt.
+ * If a word is good, it will progress to the next player's turn and change the prompt.
+ * If a word is empty, it will time out the turn.
+ * @param game Game to apply the moves to
+ * @param dictionary the dictionary to use for generating substrings
+ * @param players the players in the game
+ * @param prompts the prompts to use
+ * @param words the words to submit
+ */
 function createMovesFromList(
   game: BombPartyGame,
   dictionary: BombPartyDictionary,
@@ -58,10 +75,10 @@ function createMovesFromList(
     const word = words[currentWordIndex];
     if (word.length === 0) {
       turnTimeOut();
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+      currentPlayerIndex = game.state.currentPlayerIndex;
     } else {
       submitWord(players[currentPlayerIndex], word, currentWordIndex === 0);
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+      currentPlayerIndex = game.state.currentPlayerIndex;
     }
     if (gameOver()) {
       return;
@@ -536,7 +553,7 @@ describe('BombPartyGame', () => {
         expect(game.state.moves).toHaveLength(1);
       });
     });
-    describe('test', () => {
+    describe('first player wins when the other players give bad answers and timeout', () => {
       const newTimer = new BombPartyTimer();
       const newDictionary = new BombPartyDictionary();
       const newUpdateCallback = jest.fn();
@@ -546,9 +563,25 @@ describe('BombPartyGame', () => {
         newDictionary,
         [player1, player2, player3, player4],
         ['test', 'test', 'test', 'test'],
-        ['test', '', '', '', 'testing', '', '', '', 'tested', '', '', '', 'detest'],
+        [
+          'test',
+          'test',
+          'random',
+          '',
+          '',
+          '',
+          'testing',
+          '',
+          '',
+          '',
+          'tested',
+          '',
+          '',
+          '',
+          'detest',
+        ],
       );
-      expect(newGame.state.moves).toHaveLength(3);
+      expect(newGame.state.moves).toHaveLength(5);
       expect(newGame.state.status).toBe('OVER');
     });
     describe('[T2.4] when given an invalid move', () => {
