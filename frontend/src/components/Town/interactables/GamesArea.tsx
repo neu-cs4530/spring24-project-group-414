@@ -110,7 +110,6 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
         </Box>
         <Box
           style={{
-            // TODO: change height based on area.
             height: '600px',
             overflowY: 'scroll',
           }}>
@@ -149,18 +148,6 @@ export default function GameAreaWrapper(): JSX.Element {
     townController.unPause();
   }
 
-  // if (gameArea) {
-  //   // TODO: this is repeated code from .useInteractableAreaController(), is this required?
-  //   const gameAreaController = townController.gameAreas.find(
-  //     eachArea => eachArea.id == gameArea?.id,
-  //   );
-  //   const areaType = gameAreaController?.toInteractableAreaModel().type;
-  //   console.log(`checking: ${areaType}`);
-  //   if (areaType === 'BombPartyArea') {
-  //     modalSize = '3xl';
-  //     console.log('aosdijoiwer');
-  //   }
-  // }
   if (gameArea) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size={modalSize}>

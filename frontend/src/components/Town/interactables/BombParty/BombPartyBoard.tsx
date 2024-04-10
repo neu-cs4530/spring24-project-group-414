@@ -44,11 +44,9 @@ export default function BombPartyBoard({ gameAreaController }: BombPartyGameProp
     };
     gameAreaController.addListener('gameUpdated', updateBoardState);
     gameAreaController.addListener('turnChanged', updateBoardState);
-    // gameAreaController.addListener('moveAttempt', (move: BombPartyMove) => console.log(`move attempt: ${move}`));
     return () => {
       gameAreaController.removeListener('gameUpdated', updateBoardState);
       gameAreaController.removeListener('turnChanged', updateBoardState);
-      // gameAreaController.removeListener('moveAttempt', displayAttemptText);
     };
   }, [gameAreaController]);
 
