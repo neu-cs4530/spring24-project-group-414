@@ -15,7 +15,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { GenericGameAreaController } from '../../../classes/interactable/GameAreaController';
@@ -50,7 +49,6 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
   const gameAreaController =
     useInteractableAreaController<GenericGameAreaController>(interactableID);
   const townController = useTownController();
-  const toast = useToast();
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
   useEffect(() => {

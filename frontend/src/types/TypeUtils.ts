@@ -1,4 +1,3 @@
-import { BombPartyGameProps } from '../components/Town/interactables/BombParty/BombPartyBoard';
 import {
   ConversationArea,
   Interactable,

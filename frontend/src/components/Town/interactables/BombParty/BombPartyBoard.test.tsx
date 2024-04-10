@@ -4,11 +4,10 @@ import BombPartyAreaController from '../../../../classes/interactable/BombPartyA
 import TownController from '../../../../classes/TownController';
 import { BombPartyGameState } from '../../../../types/CoveyTownSocket';
 import BombPartyBoard from './BombPartyBoard';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import PlayerController from '../../../../classes/PlayerController';
 import { GameArea, GameStatus, BombPartySettings } from '../../../../types/CoveyTownSocket';
-import { act } from 'react-dom/test-utils';
 
 const mockToast = jest.fn();
 jest.mock('@chakra-ui/react', () => {
@@ -58,11 +57,9 @@ class MockBombPartyAreaController extends BombPartyAreaController {
   }
 
   mockClear() {
-    //TODO
     this.makeMove.mockClear();
   }
 
-  //throw new Error('Method should not be called within this component');
   get players(): PlayerController[] {
     throw new Error('Method should not be called within this component');
   }
@@ -107,15 +104,14 @@ class MockBombPartyAreaController extends BombPartyAreaController {
     throw new Error('Method should not be called within this component');
   }
 
-  public getPlayerLives(playerID: string): number {
+  public getPlayerLives(): number {
     throw new Error('Method should not be called within this component');
   }
 
-  public getPlayerPoints(playerID: string): number {
+  public getPlayerPoints(): number {
     throw new Error('Method should not be called within this component');
   }
 }
-
 //No other method should be callable
 
 describe('BombPartyBoard', () => {
@@ -145,8 +141,6 @@ describe('BombPartyBoard', () => {
   });
   async function checkBoard({
     inputEnabled,
-    checkMakeMove,
-    checkToast,
   }: {
     inputEnabled?: boolean;
     checkMakeMove?: boolean;

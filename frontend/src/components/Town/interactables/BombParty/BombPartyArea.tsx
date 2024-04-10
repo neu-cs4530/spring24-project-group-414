@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
 import { useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import { InteractableID, GameResult, GameStatus } from '../../../../types/CoveyTownSocket';
+import { InteractableID, GameStatus } from '../../../../types/CoveyTownSocket';
 import BombPartyBoard from './BombPartyBoard';
 import React from 'react';
 import PlayerController from '../../../../classes/PlayerController';
@@ -21,17 +21,36 @@ import PlayerController from '../../../../classes/PlayerController';
 /**
  * Overall BombParty frontend area that allows for the player to join a game,
  * @returns
+ *
+ *
+ * The BombPartyArea component renders the BombParty game area.
+ * It renders the current state of the area, optionally allowing the player to join the game.
+ *
+ * It uses Chakra-UI components (does not use other GUI widgets)
+ *
+ * It uses the BombPartyAreaController to get the current state of the game.
+ * It listens for the 'gameUpdated' and 'gameEnd' events on the controller, and re-renders accordingly.
+ * It subscribes to these events when the component mounts, and unsubscribes when the component unmounts. It also unsubscribes when the gameAreaController changes.
+ *
+ * it renders the following:
+ * - Player cards showing the lives and points of each player. (in a Hstack, one Box element for each player)
+ *   - If there is no player in the game, there are no players listed.
+ * - If the game is in status WAITING_TO_START, WAITING_FOR_PLAYERS and the player is not in the game, a button to join the game is displayed, with the text 'Join New Game'
+ *   - Clicking the button calls the joinGame method on the gameAreaController
+ *   - If the method call fails, a toast is displayed with the error message as the description of the toast (and status 'error')
+ *   - Once the player joins the game, the button disappears
+ * - The BombPartyBoard component, which is passed the current gameAreaController as a prop (@see BombPartyBoard.tsx)
+ * - When the game ends, a toast is displayed with the winner of the game.
  */
 export default function BombPartyArea({
   interactableID,
 }: {
   interactableID: InteractableID;
 }): JSX.Element {
-  const [inGame, setInGame] = useState(true); // NOTE: what is this for?
   const gameAreaController = useInteractableAreaController<BombPartyAreaController>(interactableID);
   const townController = useTownController();
   // states to hold BombPartyAreaValues
-  //const [players, setPlayers] = useState<PlayerController[]>(gameAreaController.players);
+
   const [player1, setPlayer1] = useState<PlayerController | undefined>(
     gameAreaController.getPlayer(0),
   );
@@ -60,8 +79,6 @@ export default function BombPartyArea({
   const [isStarting, setIsStarting] = useState(false);
   const [status, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   // states to hold game values from controller
-  const [, setHistory] = useState<GameResult[]>(gameAreaController.history);
-  //const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
 
   // toast to provide info to user (game over, connection issue)
   const toast = useToast();
@@ -77,7 +94,6 @@ export default function BombPartyArea({
     }
     //functions to update states
     const updateGameState = () => {
-      // setPlayers(gameAreaController.players);
       setGameStatus(gameAreaController.status || 'WAITING_FOR_PLAYERS');
       setPlayer1(gameAreaController.getPlayer(0));
       setPlayer2(gameAreaController.getPlayer(1));
@@ -140,7 +156,7 @@ export default function BombPartyArea({
     );
 
   const startGameButton =
-    inGame && status === 'WAITING_TO_START' ? (
+    status === 'WAITING_TO_START' ? (
       <Button
         flex='1'
         onClick={async () => {
@@ -164,6 +180,7 @@ export default function BombPartyArea({
       <></>
     );
 
+  // Cards to display info for each player
   const playerIcon = (player: PlayerController, idx: number) => {
     const lives = gameAreaController.getPlayerLives(player.id);
     const maxlives = gameAreaController.settings.maxLives;

@@ -1,5 +1,5 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { mock, mockReset } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import { act } from 'react-dom/test-utils';
@@ -14,8 +14,6 @@ import { randomLocation } from '../../../../TestUtils';
 import {
   BombPartyGameState,
   BombPartySettings,
-  ConnectFourColor,
-  ConnectFourGameState,
   GameArea,
   GameStatus,
 } from '../../../../types/CoveyTownSocket';
@@ -150,11 +148,11 @@ class MockBombPartyAreaController extends BombPartyAreaController {
     throw new Error('Method should not be called within this component');
   }
 
-  public getPlayerLives(playerID: string): number {
+  public getPlayerLives(): number {
     return 3;
   }
 
-  public getPlayerPoints(playerID: string): number {
+  public getPlayerPoints(): number {
     return 100;
   }
 }
@@ -183,9 +181,7 @@ describe('ConnectFourArea', () => {
   const townController = mock<TownController>();
   Object.defineProperty(townController, 'ourPlayer', { get: () => ourPlayer });
   const gameAreaController = new MockBombPartyAreaController();
-  let joinGameResolve: () => void;
   let joinGameReject: (err: Error) => void;
-  let startGameResolve: () => void;
   let startGameReject: (err: Error) => void;
 
   function renderBombPartyArea() {
@@ -211,14 +207,12 @@ describe('ConnectFourArea', () => {
     gameAreaController.joinGame.mockImplementation(
       () =>
         new Promise<void>((resolve, reject) => {
-          joinGameResolve = resolve;
           joinGameReject = reject;
         }),
     );
     gameAreaController.startGame.mockImplementation(
       () =>
         new Promise<void>((resolve, reject) => {
-          startGameResolve = resolve;
           startGameReject = reject;
         }),
     );

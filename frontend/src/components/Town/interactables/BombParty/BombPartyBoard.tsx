@@ -1,11 +1,13 @@
 import { Center, chakra, Image, Container, Input, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BombPartyAreaController from '../../../../classes/interactable/BombPartyAreaController';
-import { BombPartyMove } from '../../../../types/CoveyTownSocket';
 export type BombPartyGameProps = {
   gameAreaController: BombPartyAreaController;
 };
 
+/**
+ * A component that will render the BombPartyBoard, styled
+ */
 const StyledBombPartyBoard = chakra(Container, {
   baseStyle: {
     width: '500px',
@@ -17,21 +19,28 @@ const StyledBombPartyBoard = chakra(Container, {
   },
 });
 
-// type PlayerColors = 'orange' | 'lightblue' | 'green' | 'purple' | 'yellow'
-
+/**
+ * A component that renders the Bombparty board
+ *
+ * Renders the Bombparty board as a "StyledBombPartyBoard", which consists of a display showing the current players turn,
+ * an input box to make guesses, and a timer to show the current time left. This box will be outlined in black for the player whose turn it is currently.
+ *
+ * The board is re-rendered whenever the board changes.
+ *
+ * If the current player is in the game and it is their turn, the input box is enabled and the player may make guesses. If it is not the current player's turn, then the Input element will be disabled
+ *
+ * @param gameAreaController the controller for the BombPartyGame
+ */
 export default function BombPartyBoard({ gameAreaController }: BombPartyGameProps): JSX.Element {
   const [whoseTurnText, setWhoseTurnText] = useState(gameAreaController.whoseTurn?.userName);
   const [currentPromptText, setCurrentPromptText] = useState(gameAreaController.currentPrompt);
-  const [attemptText, setAttemptText] = useState('');
+  const [attemptText] = useState('');
   const [inputText, setinputText] = useState('');
 
   useEffect(() => {
     const updateBoardState = () => {
       setWhoseTurnText(gameAreaController.whoseTurn?.userName);
       setCurrentPromptText(gameAreaController.currentPrompt);
-    };
-    const displayAttemptText = (move: BombPartyMove) => {
-      setAttemptText(move.word);
     };
     gameAreaController.addListener('gameUpdated', updateBoardState);
     gameAreaController.addListener('turnChanged', updateBoardState);
